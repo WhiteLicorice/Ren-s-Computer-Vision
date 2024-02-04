@@ -124,11 +124,10 @@ def get_alternating_strips(strips):
     
     return odd_strips, even_strips
 
-#   Helper method to show an adaptive image on the screen
+#   Helper method to show an image
 def show_image(name, image):
-    #   Show image in full screen
+    #   Show image in a normal window
     cv2.namedWindow(name, cv2.WINDOW_NORMAL)
-    #cv2.setWindowProperty(name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow(name, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

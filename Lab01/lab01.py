@@ -20,6 +20,7 @@ import numpy as np
 IMAGE_PATH = "./input/image.png"
 OUTPUT_DIRECTORY = "./output"
 NUMBER_OF_STRIPS = 20
+WINDOW_NAME = "I don't want to be horny anymore... I just want to be happy."
 
 """SCRIPT"""
 
@@ -28,7 +29,7 @@ def main():
     image = cv2.imread(IMAGE_PATH)
     
     #   Show original image
-    show_image("I don't want to be horny anymore... I just want to be happy.", image)
+    show_image(WINDOW_NAME, image)
     
     #   Divide image into vertical strips
     vertical_strips = divide_vertical(image, NUMBER_OF_STRIPS)
@@ -43,7 +44,7 @@ def main():
     #   If axis = 1, then horizontal axis (place images side by side), if axis = 0, then vertical axis (mount images on top of each other)
     combined_image_vertical = np.concatenate((image_odd, image_even), axis = 1)
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/combined_vertical.jpg', combined_image_vertical)
-    show_image("I don't want to be horny anymore... I just want to be happy.", combined_image_vertical)
+    show_image(WINDOW_NAME, combined_image_vertical)
     
     #   Divide image from previous step into horizontal strips
     horizontal_strips = divide_horizontal(combined_image_vertical, NUMBER_OF_STRIPS)
@@ -57,7 +58,7 @@ def main():
     #   Show combined alternating horizontal strips and save
     combined_image_horizontal = np.concatenate((image_odd, image_even), axis = 1)       
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/combined_horizontal.jpg', combined_image_horizontal)
-    show_image("I don't want to be horny anymore... I just want to be happy.", combined_image_horizontal)
+    show_image(WINDOW_NAME, combined_image_horizontal)
     
 """UTILITIES"""
 

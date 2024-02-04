@@ -54,7 +54,7 @@ def main():
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/odd_horizontal.jpg', image_odd)
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/even_horizontal.jpg', image_even)
     
-    #   Show combined alternating vertical strips and save
+    #   Show combined alternating horizontal strips and save
     combined_image_horizontal = np.concatenate((image_odd, image_even), axis = 1)       
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/combined_horizontal.jpg', combined_image_horizontal)
     show_image("I don't want to be horny anymore... I just want to be happy.", combined_image_horizontal)

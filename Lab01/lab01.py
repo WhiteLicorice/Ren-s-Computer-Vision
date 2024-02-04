@@ -40,7 +40,8 @@ def main():
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/even_vertical.jpg', image_even)
     
     #   Show combined alternating vertical strips and save
-    combined_image_vertical = np.concatenate((image_odd, image_even), axis = 1)         #   If axis = 1, then horizontal axis (place images side by side)
+    #   If axis = 1, then horizontal axis (place images side by side), if axis = 0, then vertical axis (mount images on top of each other)
+    combined_image_vertical = np.concatenate((image_odd, image_even), axis = 1)
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/combined_vertical.jpg', combined_image_vertical)
     show_image("I don't want to be horny anymore... I just want to be happy.", combined_image_vertical)
     
@@ -54,7 +55,7 @@ def main():
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/even_horizontal.jpg', image_even)
     
     #   Show combined alternating vertical strips and save
-    combined_image_horizontal = np.concatenate((image_odd, image_even), axis = 0)       #   If axis = 0, then verttical axis (mount images on top of each other)
+    combined_image_horizontal = np.concatenate((image_odd, image_even), axis = 1)       
     cv2.imwrite(f'{OUTPUT_DIRECTORY}/combined_horizontal.jpg', combined_image_horizontal)
     show_image("I don't want to be horny anymore... I just want to be happy.", combined_image_horizontal)
     
@@ -125,8 +126,8 @@ def get_alternating_strips(strips):
 #   Helper method to show an adaptive image on the screen
 def show_image(name, image):
     #   Show image in full screen
-    cv2.namedWindow(name, cv2.WINDOW_NORMAL | cv2.WINDOW_FREERATIO | cv2.WINDOW_GUI_EXPANDED)
-    cv2.setWindowProperty(name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.namedWindow(name, cv2.WINDOW_NORMAL)
+    #cv2.setWindowProperty(name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow(name, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

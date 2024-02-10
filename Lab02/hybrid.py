@@ -98,10 +98,10 @@ def gaussian_blur(sigma, height, width):
     center_x = width // 2
     center_y = height // 2
     
-    #   Generate the Gaussian blur kernel
+    #   Generate Gaussian blur kernel
     for i in range(height):
         for j in range(width):
-            #   Calculate the Gaussian function value at each point
+            #   Calculate Gaussian function value at each point
             kernel[i, j] = (1 / (2 * np.pi * sigma**2)) * np.exp(-((i - center_y)**2 + (j - center_x)**2) / (2 * sigma**2))
 
     #   Normalize kernel values
@@ -118,9 +118,8 @@ def low_pass(img, sigma, size):
         Return an image of the same dimensions as the input image (same width,
         height and the number of color channels)
     '''
-    # TODO-BLOCK-BEGIN
-    raise Exception("TODO in hybrid.py not implemented")
-    # TODO-BLOCK-END
+    return convolution(img, gaussian_blur(sigma, size, size))
+
 
 def high_pass(img, sigma, size):
     '''Filter the image as if its filtered with a high pass filter of the given
@@ -131,9 +130,7 @@ def high_pass(img, sigma, size):
         Return an image of the same dimensions as the input image (same width,
         height and the number of color channels)
     '''
-    # TODO-BLOCK-BEGIN
-    raise Exception("TODO in hybrid.py not implemented")
-    # TODO-BLOCK-END
+    return img - low_pass(img, sigma, size)
 
 def create_hybrid_image(img1, img2, sigma1, size1, high_low1, sigma2, size2,
         high_low2, mixin_ratio, scale_factor):
@@ -160,59 +157,3 @@ def create_hybrid_image(img1, img2, sigma1, size1, high_low1, sigma2, size2,
     img2 *= mixin_ratio
     hybrid_img = (img1 + img2) * scale_factor
     return (hybrid_img * 255).clip(0, 255).astype(np.uint8)
-
-"""
-=HINTS====================================
-You may find the following code snippets useful
-
-"""
-
-''' 
-# mean filter kernel
-kernel = np.array([(1,1,1),(1,1,1),(1,1,1)])*(1/9) # 3x3
-
-#Gaussian kernel
-size=5
-sigma=3
-center=int(size/2)
-kernel=np.zeros((size,size))
-for i in range(size):
-	for j in range(size):
-          kernel[i,j] = (1/(2*np.pi*sigma**2))*np.exp(-((i-center)**2+(j-center)**2)/(2*sigma**2))
-kernel=kernel/np.sum(kernel)	#Normalize values so that sum is 1.0
-
-#dimensions of the image and the kernel
-image_height, image_width = imageGray.shape
-kernel_height, kernel_width = ______________________
-
-#Padding
-imagePadded = np.zeros((image_height+kernel_height-1,________________________)) # zero-padding scheme, you may opt for other schemes
-for i in range(image_height):
-	for j in range(image_width):
-		imagePadded[i+int((kernel_height-1)/2), j+_____________________] = imageGray[i,j]  #copy Image to padded array
-
- 
-#correlation
-for i in range(________):
-	for j in range(image_width):
-		window = imagePadded[____________________, j:j+kernel_width]
-		imageGray[i,j] = np.sum(window*kernel)  #numpy does element-wise multiplication on arrays
-
-#convolution
-		#np.flip(kernel)  # flips horizontally and vertically
-		#correlation
-
-#low pass filter
-	#Either convolution or correlation using Gaussian kernel will do 
-	#since Gaussian kernel is all-axis symmetric, either correlation or convolution can be used
-	
-#high pass filter
-	# original image - low pass image
-
-'''
-
-"""
-#merge two images (low pass image + high pass image)
-	alpha*Image1 + (1-alpha)Image2   # alpha is the amount of blending between the two images
-"""
-

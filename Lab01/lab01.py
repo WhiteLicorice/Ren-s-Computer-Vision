@@ -71,8 +71,8 @@ def save_strips(strips, key):
 #   Helper method for dividing an image into N number of even vertical strips
 def divide_vertical(image, num_strips = 10):
     #   Get image dimensions
-    _, width, _ = image.shape
-
+    _, width = image.shape[:2]
+    
     #   Calculate the width of each strip
     strip_width = width // num_strips
 
@@ -84,7 +84,7 @@ def divide_vertical(image, num_strips = 10):
 #   Helper method for dividing an image into N number of even horizontal strips
 def divide_horizontal(image, num_strips = 10):
     #   Get image dimensions
-    height, _, _ = image.shape
+    height, _ = image.shape[:2]
 
     #   Calculate the width of each strip
     strip_height = height // num_strips

@@ -94,9 +94,9 @@ def test_high_pass():
     show_image('Samurai High Pass', result)
 
 def test_create_hybrid_image():
-    # Assuming you have two images: img1 and img2
-    # img1: The image for the low-frequency component
-    # img2: The image for the high-frequency component
+    #   Assuming we have two images: img1 and img2
+    #       img1: The image for the low-frequency component
+    #       img2: The image for the high-frequency component
 
     img1 = cv2.imread('input/image1.png')
     img2 = cv2.imread('input/image2.png')
@@ -104,23 +104,23 @@ def test_create_hybrid_image():
     show_image('Honda', img1)
     show_image('Ferrari', img2)
     
-    # Define parameters for the low-frequency component
-    sigma1 = 5  # Sigma for Gaussian blur
-    size1 = 5   # Size of the kernel
-    high_low1 = 'low'  # Type of filtering ('low' for low-pass, 'high' for high-pass)
+    #   Define parameters for the low-frequency component
+    sigma1 = 5  #   Sigma for Gaussian blur
+    size1 = 5   #   Size of the kernel
+    high_low1 = 'low'  #    Type of filtering ('low' for low-pass, 'high' for high-pass)
 
-    # Define parameters for the high-frequency component
-    sigma2 = 1  # Sigma for Gaussian blur
-    size2 = 5   # Size of the kernel
-    high_low2 = 'high'  # Type of filtering ('low' for low-pass, 'high' for high-pass)
+    #   Define parameters for the high-frequency component
+    sigma2 = 1  #   Sigma for Gaussian blur
+    size2 = 5   #   Size of the kernel
+    high_low2 = 'high'  #   Type of filtering ('low' for low-pass, 'high' for high-pass)
 
-    # Mixing ratio
+    #   Mixing ratio
     mixin_ratio = 0.5
 
-    # Scale factor
+    #   Scale factor
     scale_factor = 1.0
 
-    # Create the hybrid image
+    #   Create the hybrid image
     hybrid_image = create_hybrid_image(img1, img2, sigma1, size1, high_low1, sigma2, size2, high_low2, mixin_ratio, scale_factor)
     
     show_image('Hondararri', hybrid_image)

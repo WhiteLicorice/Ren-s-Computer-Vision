@@ -1,7 +1,7 @@
 """
     Name: Computer Vision Laboratory 02
     Author: Rene Andre Bedonia Jocsing
-    Date Modified: 02/10/2024 
+    Date Modified: 02/11/2024 
     Usage: python lab02.py
     Description:
         This is a Python script that utilizes the cv2 package to implement an image filtering function

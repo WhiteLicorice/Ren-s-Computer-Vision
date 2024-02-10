@@ -1,3 +1,21 @@
+"""
+    Name: Computer Vision Laboratory 02
+    Author: Rene Andre Bedonia Jocsing
+    Date Modified: 02/10/2024 
+    Usage: python lab02.py
+    Description:
+        This is a Python script that utilizes the cv2 package to implement an image filtering function
+        and use it to create hybrid images using a simplified version of the SIGGRAPH 2006
+        paper by Oliva, Torralba, and Schyns. Hybrid images are static images that change
+        in interpretation as a function of the viewing distance. The basic idea is that high
+        frequency tends to dominate perception when it is available, but, at a distance, only
+        the low frequency (smooth) part of the signal can be seen. By blending the high frequency
+        portion of one image with the low-frequency portion of another, you get a hybrid image 
+        that leads to different interpretations at different distances.
+        All the necessary image filtering functions can be found in hybrid.py.
+        The testing suite can be found in lab02.py and should be used to access hybrid.py.
+"""
+
 from hybrid import cross_correlation, convolution, gaussian_blur
 
 import cv2
@@ -19,7 +37,7 @@ def show_image(name, image):
 
 def test_correlation():
     #   Assume that image.png already exists
-    img = cv2.imread('input/image.png')  # Assuming grayscale image
+    img = cv2.imread('input/image.png')
     
     show_image('Samurai Doge', img)
     

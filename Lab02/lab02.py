@@ -1,7 +1,7 @@
 """
     Name: Computer Vision Laboratory 02
     Author: Rene Andre Bedonia Jocsing
-    Date Modified: 02/11/2024 
+    Date Modified: 02/12/2024 
     Usage: python lab02.py
     Description:
         This is a Python script that utilizes the cv2 package to implement an image filtering function
@@ -22,9 +22,17 @@ import cv2
 import numpy as np
 
 def main():
-    test_create_hybrid_image()
-    #   TODO: Build a flet app to accept images and control filters?
-
+    #   Assume that image.png already exists
+    img = cv2.imread('input/image.png')
+    show_image("Original", img)
+    
+    #test_mean_filter_correlation()
+    #test_sobel_correlation()
+    #test_gaussian_convolution()
+    #test_low_pass()
+    test_high_pass()
+    #test_create_hybrid_image()
+    
 '''UTILITIES'''
 #   Helper method to show an image
 def show_image(name, image):
@@ -36,68 +44,75 @@ def show_image(name, image):
 
 '''TESTING'''
 
-def test_correlation():
+def test_mean_filter_correlation():
     #   Assume that image.png already exists
     img = cv2.imread('input/image.png')
     
-    show_image('Samurai Doge', img)
+    #show_image('Original', img)
     
     #   Mean Filter Kernel
-    #kernel = np.array([(1,1,1),(1,1,1),(1,1,1)])*(1/9)
-
-    #   Horizontal Sobel Kernel for Edge Detection
-    kernel = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
-
-    #   Vertical Sobel Kernel for Edge Detection
-    #kernel = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
- 
+    kernel = np.array([(1,1,1),(1,1,1),(1,1,1)])*(1/9)
+    
+    print("Now testing correlation with mean filter kernel...")
     # Apply cross-correlation
     result = cross_correlation(img, kernel)
 
-    show_image('Samurai Doge', result)
+    show_image('Mean Filter', result)
 
-def test_convolution():
+def test_sobel_correlation():
     #   Assume that image.png already exists
-    img = cv2.imread('input/image.png')  # Assuming grayscale image
+    img = cv2.imread('input/image.png')
     
-    show_image('Samurai Doge', img)
+    #show_image('Original', img)
     
-    #   Mean Filter Kernel
-    #kernel = np.array([(1,1,1),(1,1,1),(1,1,1)])*(1/9)
-
     #   Horizontal Sobel Kernel for Edge Detection
     kernel = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    
+    print("Now testing correlation with sobel kernel...")
+    # Apply cross-correlation
+    result = cross_correlation(img, kernel)
 
-    #   Vertical Sobel Kernel for Edge Detection
-    #kernel = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    show_image('Horizontal Sobel', result)
+    
+def test_gaussian_convolution():
+    #   Assume that image.png already exists
+    img = cv2.imread('input/image.png')
+    
+    #show_image('Original', img)
 
-    # Apply convolution with random Gaussian blur kernel
-    result = convolution(img, gaussian_blur(5, 3, 3))
+    print("Now testing convolution with gaussian kernel...")
+    #   Apply convolution with random Gaussian blur kernel
+    result = convolution(img, gaussian_blur(9, 3, 3))
 
-    show_image('Samurai Doge', result)
+    show_image('Gaussian Convolution', result)
 
 def test_low_pass():
     img = cv2.imread('input/image.png')
-    show_image('Samurai Doge', img)
+    #show_image('Original', img)
     
-    # Apply convolution with random Gaussian blur kernel
-    result = low_pass(img, 5, 5)
+    print("Now testing low pass filter...")
+    #   Apply low_pass filter with random Gaussian blur kernel
+    result = low_pass(img, 20, 20)
     
-    show_image('Samurai Low Pass', result)
+    show_image('Low Pass Filter', result)
 
 def test_high_pass():
     img = cv2.imread('input/image.png')
-    show_image('Samurai Doge', img)
+    #show_image('Original', img)
     
-    result = high_pass(img, 5, 5)
+    print("Now testing high pass filter...")
+    #   Apply high_pass filter with random Gaussian blur kernel
+    result = high_pass(img, 200, 4)
     
-    show_image('Samurai High Pass', result)
+    show_image('High Pass Filter', result)
 
 def test_create_hybrid_image():
     #   Assuming we have two images: img1 and img2
     #       img1: The image for the low-frequency component
     #       img2: The image for the high-frequency component
 
+    print("Now testing create_hybrid_image with default parameters...")
+    
     img1 = cv2.imread('input/image1.png')
     img2 = cv2.imread('input/image2.png')
     
@@ -105,17 +120,17 @@ def test_create_hybrid_image():
     show_image('Ferrari', img2)
     
     #   Define parameters for the low-frequency component
-    sigma1 = 5  #   Sigma for Gaussian blur
-    size1 = 5   #   Size of the kernel
+    sigma1 = 1  #   Sigma for Gaussian blur
+    size1 = 3   #   Size of the kernel
     high_low1 = 'low'  #    Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Define parameters for the high-frequency component
     sigma2 = 1  #   Sigma for Gaussian blur
-    size2 = 5   #   Size of the kernel
+    size2 = 3   #   Size of the kernel
     high_low2 = 'high'  #   Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Mixing ratio
-    mixin_ratio = 0.5
+    mixin_ratio = 0.2
 
     #   Scale factor
     scale_factor = 1.0

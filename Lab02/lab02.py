@@ -23,15 +23,15 @@ import numpy as np
 
 def main():
     #   Assume that image.png already exists
-    img = cv2.imread('input/image.png')
-    show_image("Original", img)
+    #img = cv2.imread('input/image.png')
+    #show_image("Original", img)
     
     #test_mean_filter_correlation()
     #test_sobel_correlation()
     #test_gaussian_convolution()
     #test_low_pass()
-    test_high_pass()
-    #test_create_hybrid_image()
+    #test_high_pass()
+    test_create_hybrid_image()
     
 '''UTILITIES'''
 #   Helper method to show an image
@@ -111,7 +111,7 @@ def test_create_hybrid_image():
     #       img1: The image for the low-frequency component
     #       img2: The image for the high-frequency component
 
-    print("Now testing create_hybrid_image with default parameters...")
+    print("Now testing create_hybrid_image with defined parameters...")
     
     img1 = cv2.imread('input/image1.png')
     img2 = cv2.imread('input/image2.png')
@@ -120,17 +120,17 @@ def test_create_hybrid_image():
     show_image('Ferrari', img2)
     
     #   Define parameters for the low-frequency component
-    sigma1 = 1  #   Sigma for Gaussian blur
-    size1 = 3   #   Size of the kernel
+    sigma1 = 1.0  #   Sigma for Gaussian blur
+    size1 = 10   #   Size of the kernel
     high_low1 = 'low'  #    Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Define parameters for the high-frequency component
-    sigma2 = 1  #   Sigma for Gaussian blur
-    size2 = 3   #   Size of the kernel
+    sigma2 = 2.0  #   Sigma for Gaussian blur
+    size2 = 5   #   Size of the kernel
     high_low2 = 'high'  #   Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Mixing ratio
-    mixin_ratio = 0.2
+    mixin_ratio = 0.5
 
     #   Scale factor
     scale_factor = 1.0

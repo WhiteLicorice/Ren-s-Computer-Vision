@@ -21,6 +21,24 @@ from hybrid import cross_correlation, convolution, gaussian_blur, low_pass, high
 import cv2
 import numpy as np
 
+'''GLOBALS'''
+#   Define parameters for the low-frequency component
+SIGMA1 = 1.0        #   Sigma for Gaussian blur
+SIZE1 = 10          #   Size of the kernel
+HIGH_LOW1 = 'low'   #    Type of filtering ('low' for low-pass, 'high' for high-pass)
+
+#   Define parameters for the high-frequency component
+SIGMA2 = 2.0        #   Sigma for Gaussian blur
+SIZE2 = 5           #   Size of the kernel
+HIGH_LOW2 = 'high'  #   Type of filtering ('low' for low-pass, 'high' for high-pass)
+
+#   Mixing ratio
+MIXIN_RATIO = 0.5
+
+#   Scale factor
+SCALE_FACTOR = 1.0
+
+'''DRIVER CODE'''
 def main():
     #   Assume that image.png already exists
     #img = cv2.imread('input/image.png')
@@ -120,14 +138,14 @@ def test_create_hybrid_image():
     show_image('Ferrari', img2)
     
     #   Define parameters for the low-frequency component
-    sigma1 = 1.0  #   Sigma for Gaussian blur
-    size1 = 10   #   Size of the kernel
-    high_low1 = 'low'  #    Type of filtering ('low' for low-pass, 'high' for high-pass)
+    sigma1 = SIGMA1         #   Sigma for Gaussian blur
+    size1 = SIZE1           #   Size of the kernel
+    high_low1 = HIGH_LOW1   #    Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Define parameters for the high-frequency component
-    sigma2 = 2.0  #   Sigma for Gaussian blur
-    size2 = 5   #   Size of the kernel
-    high_low2 = 'high'  #   Type of filtering ('low' for low-pass, 'high' for high-pass)
+    sigma2 = SIGMA2         #   Sigma for Gaussian blur
+    size2 = SIZE2           #   Size of the kernel
+    high_low2 = HIGH_LOW2   #   Type of filtering ('low' for low-pass, 'high' for high-pass)
 
     #   Mixing ratio
     mixin_ratio = 0.5

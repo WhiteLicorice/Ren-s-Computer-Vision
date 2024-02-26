@@ -21,8 +21,8 @@ def main():
     #test_construct_gaussian_pyramids()
     #test_construct_pyramids()
     #test_blend_pyramids()
-    test_reconstruct_image()
-    #test_blend_image()
+    #test_reconstruct_image()
+    test_blend_image()
     
     return
     
@@ -34,12 +34,21 @@ def show_image(name, image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    #   Helper method for saving strips (key is used as a filename identifier)
+#   Helper method for saving strips (key is used as a filename identifier)
 def save_images(images, key):
     #   Save and/or display each strip
     for i, strip in enumerate(images):
         cv2.imwrite(f'output/{key}_{i + 1}.jpg', strip)  #    Save each strip to a uniquely named file
-    
+
+#   Helper method for saving a single image  
+def save_image(image, key):
+    cv2.imwrite(f'output/{key}.jpg', image)
+
+#   Helper method for naive brightening of image via multiplying each pixel by a brightness factor
+def brighten_image(image, brightness_factor):
+    return np.clip(image.astype(np.float32) * brightness_factor, 0, 255).astype(np.uint8)
+
+"""TESTING MODULES"""  
 def test_interpolate():
     image = cv2.imread("input/image.png")
     
@@ -120,29 +129,36 @@ def test_blend_pyramids():
         
 def test_reconstruct_image():
     # Read the input image
-    image = cv2.imread("input/image.png")
+    image = cv2.imread("input/orange.jpg")
     
     show_image("Original Image", image)
     
     laplacian_pyramids, _ = construct_pyramids(image)
+    
+    # for i, level in enumerate(laplacian_pyramids):
+    #     print(f"Laplacian {i + 1}: {level.shape}")
+    #     show_image(f"Laplacian {i + 1}", level)
     
     reconstructed_image = reconstruct_image(laplacian_pyramids)
     
     show_image("Reconstructed Image", reconstructed_image)
     
 def test_blend_image():
-    # Read the input image
+    # Read the images, A and B, as well as the mask M (we assume they are already of the same dimensions)
     A = cv2.imread("input/orange.jpg", cv2.IMREAD_COLOR)
     B = cv2.imread("input/apple.jpg", cv2.IMREAD_COLOR)
     M = cv2.imread("input/mask.jpg", cv2.IMREAD_COLOR)
 
     show_image("Orange", A)
     show_image("Apple", B)
-    
+
     blended_image = blend_image(A, B, M)
     
-    #save_images(blended_pyramid, "blended")
+    save_image(blended_image, "blended")
 
+    #   Brighten image for viewing purposes
+    #blended_image = brighten_image(blended_image, 3)
+    
     show_image("Blended Image", blended_image)
 
 if __name__ == "__main__":

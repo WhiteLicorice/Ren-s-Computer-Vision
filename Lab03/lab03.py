@@ -1,3 +1,15 @@
+"""
+    Name: Computer Vision Laboratory 03
+    Author: Rene Andre Bedonia Jocsing
+    Date Modified: 02/26/2024 
+    Usage: python lab03.py
+    Description:
+        This is a Python script that utilizes the cv2 package to implement an image blending
+        algorithm using Laplacian and Gaussian pyramids.
+        All the necessary functions can be found in blend.py.
+        The testing suite can be found in lab03.py and should be used to access blend.py.
+"""
+
 import cv2
 import numpy as np
 

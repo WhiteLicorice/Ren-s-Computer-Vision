@@ -23,6 +23,7 @@ def main():
     #test_blend_pyramids()
     #test_reconstruct_image()
     test_blend_image()
+    test_blend_image_creative()
     
     return
     
@@ -154,12 +155,34 @@ def test_blend_image():
 
     blended_image = blend_image(A, B, M)
     
-    save_image(blended_image, "blended")
+    #save_image(blended_image, "blended")
 
     #   Brighten image for viewing purposes
-    #blended_image = brighten_image(blended_image, 3)
+    blended_image = brighten_image(blended_image, 1.5)
+    
+    save_image(blended_image, "blended")
     
     show_image("Blended Image", blended_image)
+    
+def test_blend_image_creative():
+    # Read the images, A and B, as well as the mask M (we assume they are already of the same dimensions)
+    A = cv2.imread("input/pawn.png", cv2.IMREAD_COLOR)
+    B = cv2.imread("input/bishop.png", cv2.IMREAD_COLOR)
+    M = cv2.imread("input/crazymask.png", cv2.IMREAD_COLOR)
+
+    show_image("Pawn", A)
+    show_image("Bishop", B)
+
+    blended_image = blend_image(A, B, M)
+    
+    #save_image(blended_image, "crazy")
+
+    #   Brighten image for viewing purposes
+    blended_image = brighten_image(blended_image, 1.5)
+    
+    save_image(blended_image, "crazy")
+    
+    show_image("Crazy Image", blended_image)
 
 if __name__ == "__main__":
     main()

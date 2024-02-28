@@ -17,3 +17,30 @@ Your pair of images needs to be aligned using an image manipulation software, e.
 ##  Lab 03
 
 The goal of this laboratory exercise is to blend two images seamlessly using a multi resolution blending as described in the 1983 [paper](https://persci.mit.edu/pub_pdfs/spline83.pdf) by Burt and Adelson. An image spline is a smooth seam joining two image together by gently distorting them. Multiresolution blending computes a gentle seam between the two images seperately at each band of image frequencies, resulting in a much smoother seam. You are to create and visualize the Gaussian and Laplacian stacks of the input images, blending together images with the help of the completed stacks, and explore creative outcomes. If you would rather work with pyramids, you may implement pyramids rather than stacks. However, in any case, you are not allowed to use existing pyramid (pyrDown, pyrUp) functions. You must implement your stacks/pyramids from scratch.
+
+The results are as follows.
+
+<table>
+  <tr>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/81cb1413-c3d0-4bed-a5fd-3dbb56db40dc" alt="apple"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/99daf091-a219-4f17-b9f2-b6f4227f004e" alt="orange"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/b77c6dd2-6c22-425d-a52b-016d5db6262b" alt="mask"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/69a472cb-cfc7-4462-ada8-8cf7c793ef2e" alt="blended apple orange"></td>
+  </tr>
+  <caption>Figure 3.1: Blending an Apple and an Orange with a Vertical Mask</caption>
+</table>
+
+<table>
+  <tr>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/5324e65a-a370-4998-80e4-bbfd7e5b98e1" alt="pawn"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/3b7405b6-b492-46ad-b0c4-875adcec6ed2" alt="bishop"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/1339c0ed-5456-4b3c-a846-d62ac6461588" alt="crazymask"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/086adeb3-a234-4a53-a59d-3c572578029f" alt="crazy"></td>
+  </tr>
+  <caption>Figure 3.2: Blending Two Chessboards with an Irregular Mask</caption>
+</table>
+

@@ -13,7 +13,7 @@
 import cv2
 import numpy as np
 
-from blend import interpolate, decimate, construct_gaussian_pyramid, construct_pyramids, blend_pyramids, blend_image, reconstruct_image
+from blending import interpolate, decimate, construct_gaussian_pyramid,construct_pyramids, blend_pyramids, blend_image, reconstruct_image
 
 def main():
     #test_interpolate()

@@ -19,6 +19,9 @@ def interpolate(img):
     #   Interpolate via cv2 linear interpolation, worse than INTER_BICUBIC but faster and still looks okay on small images
     interpolated_image = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     
+    #   Apply Gaussian blur after upscaling, approximating a 5-tap binomial filter
+    interpolated_image = cv2.GaussianBlur(interpolated_image, (5, 5), sigmaX=0.7, sigmaY=0.7)
+    
     return interpolated_image
 
 def decimate(img):
@@ -36,8 +39,11 @@ def decimate(img):
     new_height = int(height / downsampling_rate)
     new_width = int(width / downsampling_rate)
 
+    #   Apply Gaussian blur, approximating a 5-tap binomial filter, before performing downsampling
+    decimated_image = cv2.GaussianBlur(img, (5, 5), sigmaX=0.7, sigmaY=0.7)
+    
     #   Decimate via cv2 inter-area interpolation, which is useful for downsampling according to StackOverFlow gurus
-    decimated_image = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    decimated_image = cv2.resize(decimated_image, (new_width, new_height), interpolation=cv2.INTER_AREA)
 
     return decimated_image
 
@@ -100,7 +106,7 @@ def reconstruct_image(pyramid):
             pyramid: A Laplacian pyramid.
 
         Returns:
-            stack: A reconstructed image obtained by summing up the Laplacian pyramid.
+            reconstructed_image: A reconstructed image obtained by summing up the Laplacian pyramid.
     """
 
     #   Start with the smallest pyramid so we need to reverse the order
@@ -143,9 +149,9 @@ def blend_pyramids(A, B, M):
   
     blended_pyramid = []
     
-    #   Formula for blending pyramids that I lifted from https://github.com/twyunting/Laplacian-Pyramids.git
+    #   Formula for blending pyramids that I lifted from https://github.com/twyunting/Laplacian-Pyramids.git and other correspondent sources
     for i in range(len(LA)):
-        LS = GM[i] / 255 * LA[i] + (1 - GM[i] / 255) * LB[i]
+        LS = GM[i] / 255 * LA[i] + (1 - GM[i] / 255) * LB[i]    #   Normalize via division with 255 to produce dim image
         blended_pyramid.append(LS)
   
     return blended_pyramid

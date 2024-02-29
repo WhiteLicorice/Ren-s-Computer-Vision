@@ -16,15 +16,14 @@ import numpy as np
 from blending import interpolate, decimate, construct_gaussian_pyramid,construct_pyramids, blend_pyramids, blend_image, reconstruct_image
 
 def main():
-    #test_interpolate()
-    #test_decimate()
-    #test_construct_gaussian_pyramids()
-    #test_construct_pyramids()
-    #test_blend_pyramids()
-    #test_reconstruct_image()
-    test_blend_image()
-    test_blend_image_creative()
-    
+    #test_interpolate()                     #   Passing        
+    #test_decimate()                        #   Passing
+    #test_construct_gaussian_pyramids()     #   Passing
+    #test_construct_pyramids()              #   Passing
+    #test_blend_pyramids()                  #   Passing? Hard to tell, honestly.
+    #test_reconstruct_image()               #   Passing
+    test_blend_image()                     #   Failing! TODO: Resolve mismatch between (x, y, z) images and (x, y) images
+    #test_blend_image_creative()
     return
     
 #   Helper method to show an image
@@ -73,14 +72,14 @@ def test_decimate():
     show_image("Decimated", decimated_image)
     
 def test_construct_gaussian_pyramids():
-    image = cv2.imread("input/image.png")
+    image = cv2.imread("input/apple.jpg")
     
-    print(f"Gaussian 0: {image.shape}")
-    show_image("Gaussian 0", image)
+    #print(f"Gaussian 0: {image.shape}")
+    #show_image("Gaussian 0", image)
     
     gaussian_pyramid = construct_gaussian_pyramid(image)
     
-    save_images(gaussian_pyramid, "gaussian")
+    #save_images(gaussian_pyramid, "gaussian")
     
     for i, level in enumerate(gaussian_pyramid):
         print(f"Gaussian {i + 1}: {level.shape}")
@@ -97,8 +96,8 @@ def test_construct_pyramids():
     # Construct the Laplacian pyramid
     laplacian_pyramid, gaussian_pyramid = construct_pyramids(image)
     
-    save_images(laplacian_pyramid, "laplacian")
-    save_images(gaussian_pyramid, "gaussian")
+    #save_images(laplacian_pyramid, "laplacian")
+    #save_images(gaussian_pyramid, "gaussian")
 
     # Display the Gaussian pyramid
     for i, level in enumerate(gaussian_pyramid):
@@ -158,9 +157,9 @@ def test_blend_image():
     #save_image(blended_image, "blended")
 
     #   Brighten image for viewing purposes
-    blended_image = brighten_image(blended_image, 1.5)
+    #blended_image = brighten_image(blended_image, 1.5)
     
-    save_image(blended_image, "blended")
+    #save_image(blended_image, "blended")
     
     show_image("Blended Image", blended_image)
     
@@ -178,12 +177,13 @@ def test_blend_image_creative():
     #save_image(blended_image, "crazy")
 
     #   Brighten image for viewing purposes
-    blended_image = brighten_image(blended_image, 1.5)
+    #blended_image = brighten_image(blended_image, 1.5)
     
-    save_image(blended_image, "crazy")
+    #save_image(blended_image, "crazy")
     
     show_image("Crazy Image", blended_image)
 
+    
 if __name__ == "__main__":
     main()
     

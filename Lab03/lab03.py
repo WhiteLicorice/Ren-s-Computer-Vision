@@ -22,8 +22,8 @@ def main():
     #test_construct_pyramids()              #   Passing
     #test_blend_pyramids()                  #   Passing? Hard to tell, honestly.
     #test_reconstruct_image()               #   Passing
-    test_blend_image()                     #   Failing! TODO: Resolve mismatch between (x, y, z) images and (x, y) images
-    #test_blend_image_creative()
+    test_blend_image()                      #   Passing
+    test_blend_image_creative()             #   Passing
     return
     
 #   Helper method to show an image
@@ -154,7 +154,7 @@ def test_blend_image():
 
     blended_image = blend_image(A, B, M)
     
-    #save_image(blended_image, "blended")
+    save_image(blended_image, "blended")
 
     #   Brighten image for viewing purposes
     #blended_image = brighten_image(blended_image, 1.5)
@@ -174,7 +174,7 @@ def test_blend_image_creative():
 
     blended_image = blend_image(A, B, M)
     
-    #save_image(blended_image, "crazy")
+    save_image(blended_image, "crazy")
 
     #   Brighten image for viewing purposes
     #blended_image = brighten_image(blended_image, 1.5)

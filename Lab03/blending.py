@@ -3,47 +3,61 @@ import numpy as np
 from scipy.signal import convolve2d as convolve
 
 #   Define the binomial 5-tap filter
-kernel = (1.0/256) * np.array([[1, 4, 6, 4, 1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4, 6, 4, 1]])
+kernel = (1.0/256) * np.array([
+                                [1, 4, 6, 4, 1],
+                                [4, 16, 24, 16, 4],
+                                [6, 24, 36, 24, 6],
+                                [4, 16, 24, 16, 4],
+                                [1, 4, 6, 4, 1]
+                                                    ])
 
 def interpolate(img):
     """
-    Interpolates an image with upsampling rate r = 2.
+        Interpolates an image with upsampling rate r = 2.
 
-    :param img: input image with 3 channels (RGB)
-    :return: the interpolated image with upsampling rate r = 2
+        Parameters:
+                image: the original image 
+        Returns:
+                interpolated_image: the image interpolated by a factor of 2.
     """
-    interpolated_image = np.zeros((2 * img.shape[0], 2 * img.shape[1], 3))
     
-    channels = img.shape[2] if len(img.shape) > 2 else 1
-    for channel in range(channels):
-        # Upsample each channel
-        interpolated_image[::2, ::2, channel] = img[:, :, channel]
-        # Blur and quadruple kernel area, since we interpolated by 4x
-        interpolated_image[:, :, channel] = convolve(interpolated_image[:, :, channel], 4 * kernel, mode='same')
+    channels = split_rgb(img)
+    processed_channels = [ ]
+    
+    for channel in channels:
+        interpolated_channel = np.zeros((2 * channel.shape[0], 2 * channel.shape[1]))
+        #   Upsample each channel
+        interpolated_channel[::2, ::2] = channel
+        #   Blur and quadruple kernel area, since we interpolated by 4x
+        interpolated_channel = convolve(interpolated_channel, 4 * kernel, mode='same')
+        processed_channels.append(interpolated_channel)
         
-    # interpolated_image[::2, ::2] = img[:, :]
-    #     # Blur and quadruple kernel area, since we interpolated by 4x
-    # interpolated_image[:, :] = convolve(interpolated_image[:, :], 4 * kernel, mode='same')
-        
-    return interpolated_image.astype(np.uint8)
+    interpolated_image = cv2.merge(processed_channels)
+    
+    return interpolated_image
 
 def decimate(img):
     """
-    Decimates an image with downsampling rate r = 2.
+        Decimates an image with downsampling rate r = 2.
+        
+        Parameters:
+                image: the original image 
+        Returns:
+                interpolated_image: the image decimated by a factor of 2.
 
-    :param img: input image with 3 channels (RGB)
-    :return: the decimated image with downsampling rate r = 2
     """
-    decimated_image = np.zeros((img.shape[0]//2, img.shape[1]//2, 3))
     
-    channels = img.shape[2] if len(img.shape) > 2 else 1
-    for channel in range(channels):
-        # Blur and decimate each channel
-        decimated_image[:, :, channel] = convolve(img[:, :, channel], kernel, mode='same')[::2, ::2]
+    channels = split_rgb(img)
+    processed_channels = [ ]
     
-    # decimated_image[:, :] = convolve(img[:, :], kernel, mode='same')[::2, ::2]
+    for channel in channels:
+        #   Apply Gaussian blur then downsample each channel
+        decimated_channel = convolve(channel, kernel, mode='same')[::2, ::2]
+        processed_channels.append(decimated_channel)
+        
+    decimated_image = cv2.merge(processed_channels)
     
-    return decimated_image.astype(np.uint8)
+    return decimated_image
 
 def construct_gaussian_pyramid(image):
     """
@@ -103,7 +117,7 @@ def reconstruct_image(pyramid):
     for i in range(1, len(inverted_pyramid)):
         reconstructed_image = interpolate(reconstructed_image) + inverted_pyramid[i]
         
-    return reconstructed_image
+    return bound(reconstructed_image)
 
 def blend_pyramids(A, B, M):
     """
@@ -122,12 +136,28 @@ def blend_pyramids(A, B, M):
     
     blended_pyramid = []
     
-    #   Formula for blending pyramids that I lifted from https://github.com/twyunting/Laplacian-Pyramids.git and other correspondent sources
+    #   Formula for blending pyramids that I lifted from https://github.com/twyunting/Laplacian-Pyramids.git and other sources
     for i in range(len(LA)):
         LS = GM[i] / 255 * LA[i] + (1 - GM[i] /255) * LB[i]
-        blended_pyramid.append(LS)
+        blended_pyramid.append(bound(LS))
         
     return blended_pyramid
+
+def split_rgb(img):
+    
+    """
+        Wrapper around cv2.split() for splitting an image into individual channels.
+        Parameters:
+            img: the image to be splitted.
+        Returns:
+            channels: an array-like of the splitted channels.
+    """
+    return cv2.split(img)
+
+def bound(img):
+   img[img < 0] = 0
+   img[img > 255] = 255
+   return img.astype(np.uint8)
 
 def blend_image(img1, img2, mask):
     """
@@ -142,9 +172,9 @@ def blend_image(img1, img2, mask):
         blended_image: The blended image.
     """
     #   Split images into RGB channels, assuming all three are of the same dimensions
-    img1R, img1G, img1B = cv2.split(img1)
-    img2R, img2G, img2B = cv2.split(img2)
-    mask, _, _ = cv2.split(mask)
+    img1R, img1G, img1B = split_rgb(img1)
+    img2R, img2G, img2B = split_rgb(img2)
+    mask, _, _ = split_rgb(mask)
     
     #   Apply pyramid blending to each channel
     R = reconstruct_image(blend_pyramids(img1R, img2R, mask))

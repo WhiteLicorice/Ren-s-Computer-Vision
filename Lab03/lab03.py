@@ -182,9 +182,6 @@ def test_blend_image_creative():
     #save_image(blended_image, "crazy")
     
     show_image("Crazy Image", blended_image)
-
-    
+ 
 if __name__ == "__main__":
     main()
-    
-    

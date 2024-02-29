@@ -155,9 +155,16 @@ def split_rgb(img):
     return cv2.split(img)
 
 def bound(img):
-   img[img < 0] = 0
-   img[img > 255] = 255
-   return img.astype(np.uint8)
+    """
+        Clip values between (0, 255) per pixel in the image.
+        Parameters:
+            img: the image to be normalized.
+        Returns:
+            clipped_image: the image with pixel values normalized to (0, 255) inclusive.
+    """
+    img[img < 0] = 0
+    img[img > 255] = 255
+    return img.astype(np.uint8)
 
 def blend_image(img1, img2, mask):
     """

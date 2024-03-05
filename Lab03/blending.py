@@ -28,7 +28,7 @@ def interpolate(img):
         interpolated_channel = np.zeros((2 * channel.shape[0], 2 * channel.shape[1]))
         #   Upsample each channel
         interpolated_channel[::2, ::2] = channel
-        #   Blur and quadruple kernel area, since we interpolated by 4x
+        #   Blur and quadruple kernel area, since we interpolated by a factor of 4
         interpolated_channel = convolve(interpolated_channel, 4 * kernel, mode='same')
         processed_channels.append(interpolated_channel)
         

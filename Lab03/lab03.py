@@ -13,17 +13,17 @@
 import cv2
 import numpy as np
 
-from blending import interpolate, decimate, construct_gaussian_pyramid,construct_pyramids, blend_pyramids, blend_image, reconstruct_image
+from blending import interpolate, decimate, construct_gaussian_pyramid,construct_pyramids, blend_pyramids, blend_image, reconstruct_image, bound
 
 def main():
     #test_interpolate()                     #   Passing        
     #test_decimate()                        #   Passing
     #test_construct_gaussian_pyramids()     #   Passing
     #test_construct_pyramids()              #   Passing
-    #test_blend_pyramids()                  #   Passing? Hard to tell, honestly.
-    #test_reconstruct_image()               #   Passing
-    test_blend_image()                      #   Passing
-    test_blend_image_creative()             #   Passing
+    #test_blend_pyramids()                  #   Passing
+    test_reconstruct_image()               #   Passing
+    #test_blend_image()                     #   Passing
+    #test_blend_image_creative()            #   Passing
     return
     
 #   Helper method to show an image
@@ -44,7 +44,7 @@ def save_images(images, key):
 def save_image(image, key):
     cv2.imwrite(f'output/{key}.jpg', image)
 
-#   Helper method for naive brightening of image via multiplying each pixel by a brightness factor
+#   Helper method for naive brightening/dimming of image via multiplying each pixel by a brightness factor
 def brighten_image(image, brightness_factor):
     return np.clip(image.astype(np.float32) * brightness_factor, 0, 255).astype(np.uint8)
 
@@ -55,7 +55,7 @@ def test_interpolate():
     print(image.shape)
     show_image("Original", image)
     
-    interpolated_image = interpolate(image)
+    interpolated_image = bound(interpolate(image))
     
     print(interpolated_image.shape)
     show_image("Interpolated", interpolated_image)
@@ -66,7 +66,7 @@ def test_decimate():
     print(image.shape)
     show_image("Original", image)
     
-    decimated_image = decimate(image)
+    decimated_image = bound(decimate(image))
     
     print(decimated_image.shape)
     show_image("Decimated", decimated_image)
@@ -83,9 +83,8 @@ def test_construct_gaussian_pyramids():
     
     for i, level in enumerate(gaussian_pyramid):
         print(f"Gaussian {i + 1}: {level.shape}")
-        show_image(f"Gaussian {i + 1}", level)
+        show_image(f"Gaussian {i + 1}", bound(level))
         
-    
 def test_construct_pyramids():
     # Read the input image
     image = cv2.imread("input/apple.jpg")
@@ -102,12 +101,12 @@ def test_construct_pyramids():
     # Display the Gaussian pyramid
     for i, level in enumerate(gaussian_pyramid):
         print(f"Gaussian {i + 1}: {level.shape}")
-        show_image(f"Gaussian {i + 1}", level)
+        show_image(f"Gaussian {i + 1}", bound(level))
     
     # Display the Laplacian pyramid
     for i, level in enumerate(laplacian_pyramid):
         print(f"Laplacian {i + 1}: {level.shape}")
-        show_image(f"Laplacian {i + 1}", level)
+        show_image(f"Laplacian {i + 1}", bound(level))
         
 def test_blend_pyramids():
     # Read the input image
@@ -154,7 +153,7 @@ def test_blend_image():
 
     blended_image = blend_image(A, B, M)
     
-    save_image(blended_image, "blended")
+    #save_image(blended_image, "blended")
 
     #   Brighten image for viewing purposes
     #blended_image = brighten_image(blended_image, 1.5)
@@ -174,7 +173,7 @@ def test_blend_image_creative():
 
     blended_image = blend_image(A, B, M)
     
-    save_image(blended_image, "crazy")
+    #save_image(blended_image, "crazy")
 
     #   Brighten image for viewing purposes
     #blended_image = brighten_image(blended_image, 1.5)

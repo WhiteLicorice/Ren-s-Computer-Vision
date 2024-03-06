@@ -148,7 +148,7 @@ def blend_pyramids(A, B, M):
     #   Formula for blending pyramids that I lifted from the blackboard (amazing!)
     for i in range(len(GM)):
         LS = GM[i] / 255 * LA[i] + (1 - GM[i] /255) * LB[i]
-        blended_pyramid.append(bound(LS))   #   Bounding here blends the image colors as well! ~ found out after 3 weeks of experimentation
+        blended_pyramid.append(bound(LS))   #   Bounding here blends the image colors as well! ~ found out after 3 weeks of experimentation (manifesting moved deadlines)
         
     return blended_pyramid
 

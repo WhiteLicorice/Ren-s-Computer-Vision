@@ -17,7 +17,8 @@ def interpolate(img):
         Interpolates an image with upsampling rate r = 2.
 
         Parameters:
-                image: the original image 
+                image: the original image
+                
         Returns:
                 interpolated_image: the image interpolated by a factor of 2.
     """
@@ -43,7 +44,8 @@ def decimate(img):
         Decimates an image with downsampling rate r = 2.
         
         Parameters:
-                image: the original image 
+                image: the original image
+                
         Returns:
                 interpolated_image: the image decimated by a factor of 2.
 
@@ -64,8 +66,10 @@ def decimate(img):
 def construct_gaussian_pyramid(image):
     """
         Constructs a Gaussian pyramid to max depth.
+        
         Parameters:
                 image: the original image (i.e. base of the pyramid)
+                
         Returns:
                 gaussian_pyramid: A sequence of Gaussian pyramids to max depth.
     """
@@ -83,8 +87,10 @@ def construct_gaussian_pyramid(image):
 def construct_pyramids(image):
     """
         Constructs a Laplacian pyramid to max depth and its corresponding Gaussian pyramid to max depth - 1.
+        
         Parameters:
                 image: the original image (i.e. base of the pyramid)
+                
         Returns:
                 laplacian_pyramid: A sequence of Laplacian pyramids to max depth.
                 gaussian_pyramid: A sequence of corresponding Gaussian pyramids to max depth - 1.
@@ -111,23 +117,24 @@ def reconstruct_image(pyramid):
             reconstructed_image: A reconstructed image obtained by summing up the Laplacian pyramid.
     """
 
-    #   Invert pyramid and start reconstruction from the smallest layer
-    inverted_pyramid = pyramid[::-1]
-    reconstructed_image = inverted_pyramid[0]
+    #   Grab the last layer in the laplacian pyramid for reverse traversal
+    reconstructed_image = pyramid[-1]
     
-    #   Add up all the pyramid layers, reversing the process in construct_pyramids()
-    for i in range(1, len(inverted_pyramid)):
-        reconstructed_image = interpolate(reconstructed_image) + inverted_pyramid[i]
+    #   Add up all the pyramid layers from the smallest layer up to the largest layer, reversing the process in construct_pyramids()
+    for i in range(len(pyramid) - 2, -1, -1):
+        reconstructed_image = interpolate(reconstructed_image) + pyramid[i]
         
     return bound(reconstructed_image)
 
 def blend_pyramids(A, B, M):
     """
         Blends two Laplacian pyramids using a Gaussian pyramid constructed from a mask as weights.
+        
         Parameters:
                 A: the first image
                 B: the second iamge
                 M: the mask
+                
         Returns:
                 blended_pyramid: a blended pyramid from two images and a mask.
     """
@@ -139,17 +146,19 @@ def blend_pyramids(A, B, M):
     blended_pyramid = [ ]
     
     #   Formula for blending pyramids that I lifted from the blackboard (amazing!)
-    for i in range(len(LA)):
+    for i in range(len(GM)):
         LS = GM[i] / 255 * LA[i] + (1 - GM[i] /255) * LB[i]
-        blended_pyramid.append(bound(LS))
+        blended_pyramid.append(bound(LS))   #   Bounding here blends the image colors as well! ~ found out after 3 weeks of experimentation
         
     return blended_pyramid
 
 def split_rgb(img):
     """
         Wrapper around cv2.split() for splitting an image into individual channels.
+        
         Parameters:
             img: the image to be splitted.
+            
         Returns:
             channels: an array-like of the splitted channels.
     """
@@ -159,8 +168,10 @@ def bound(img):
     """
         Clip values between (0, 255) per pixel in the image. This is needed because there are instances where values are out of bounds.
         Out of bound values in cv2 images generate noise and are unpleasant to look at.
+        
         Parameters:
             img: the image to be normalized.
+            
         Returns:
             clipped_image: the image with pixel values normalized to (0, 255) inclusive.
     """
@@ -170,8 +181,8 @@ def bound(img):
 
 def blend_image(img1, img2, mask):
     """
-    Blends two images together based on a mask. All three images are assumed to be of the same size.
-    No check is performed to see if this assumption is met.
+        Blends two images together based on a mask. All three images are assumed to be of the same size.
+        No error-handling occurs if the images are not of the same size, but an error is thrown.
 
     Parameters:
         img1: The first image.

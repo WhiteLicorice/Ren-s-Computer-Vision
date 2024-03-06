@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scipy.ndimage import convolve
+from scipy.signal import convolve2d as convolve
 
 #   Define a binomial 5-tap binomial filter from https://docs.opencv.org/3.4/d4/d1f/tutorial_pyramids.html
 #   According to the docs, this is the kernel that OpenCV pyrDown and pyrUp uses
@@ -30,8 +30,8 @@ def interpolate(img):
         interpolated_channel = np.zeros((2 * channel.shape[0], 2 * channel.shape[1]))
         #   Upsample each channel, by taking pixels from the original channel and using them to fill every other pixel of the blank channel
         interpolated_channel[::2, ::2] = channel
-        #   Blur by quadrupling the kernel, since we interpolated by a factor of 2
-        interpolated_channel = convolve(interpolated_channel, 4 * kernel, mode='constant')
+        #   Blur by quadrupling the kernel, since we interpolated by a factor of 2(width) and 2(height)
+        interpolated_channel = convolve(interpolated_channel, 4 * kernel, mode='same')
         processed_channels.append(interpolated_channel)
         
     interpolated_image = cv2.merge(processed_channels)
@@ -54,7 +54,7 @@ def decimate(img):
     
     for channel in channels:
         #   Apply Gaussian blur then downsample each channel by taking every other pixel
-        decimated_channel = convolve(channel, kernel, mode='constant')[::2, ::2]
+        decimated_channel = convolve(channel, kernel, mode='same')[::2, ::2]
         processed_channels.append(decimated_channel)
         
     decimated_image = cv2.merge(processed_channels)

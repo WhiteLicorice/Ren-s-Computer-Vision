@@ -27,7 +27,6 @@ def main():
     return
 
 """UTILITIES"""
-
 #   Helper method to show an image
 def show_image(name, image):
     #   Show image in a normal window
@@ -117,7 +116,7 @@ def test_blend_pyramids():
     
     #save_images(blended_pyramid, "blended")
 
-    # Display the blended pyramid
+    #   Display the blended pyramid
     for i, level in enumerate(blended_pyramid):
         print(f"Blended {i + 1}: {level.shape}")
         show_image(f"Blended {i + 1}", bound(level))

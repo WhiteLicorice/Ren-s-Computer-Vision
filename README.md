@@ -27,7 +27,7 @@ The results are as follows.
   </tr>
   <tr>
     <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/b77c6dd2-6c22-425d-a52b-016d5db6262b" alt="mask"></td>
-    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/2ed8fea1-9076-4a8a-8403-55899c640d8f" alt="blended apple orange"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/1de1860f-8191-4009-8983-05c6e4238fc2" alt="blended apple orange"></td>
   </tr>
   <caption>Figure 3.1: Blending an Apple and an Orange with a Vertical Mask (Orapple)</caption>
 </table>
@@ -39,7 +39,10 @@ The results are as follows.
   </tr>
   <tr>
     <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/1339c0ed-5456-4b3c-a846-d62ac6461588" alt="crazymask"></td>
-    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/54efd071-1eef-44dd-88df-39b2f4958181" alt="crazy"></td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/3fbb9406-bac8-449a-9d0a-2dc89146426e" alt="crazy"></td>
   </tr>
   <caption>Figure 3.2: Blending Two Chessboards with an Irregular Mask (Not Your Typical Endgame)</caption>
 </table>
+
+
+

@@ -33,6 +33,7 @@ def interpolate(img):
         interpolated_channel[::2, ::2] = channel
         #   Blur by quadrupling the kernel, since we interpolated by a factor of 2(width) and 2(height)
         interpolated_channel = convolve(interpolated_channel, 4 * kernel, mode='same')
+        
         processed_channels.append(interpolated_channel)
         
     interpolated_image = cv2.merge(processed_channels)
@@ -102,11 +103,14 @@ def construct_pyramids(image):
     #   Subtract layers to max depth, laplacian_i = gaussian_i - interpolate(gaussian_i+1)
     for i in range(len(gaussian_pyramid) - 1):
         laplacian_pyramid.append(gaussian_pyramid[i] - interpolate(gaussian_pyramid[i + 1]))
-  
-    #   Discard the last level of the gaussian pyramid as it has no correspondent in the laplacian pyramid
-    return laplacian_pyramid, gaussian_pyramid[:-1]
+    
+    #   Let the last layer of the laplacian pyramid be the last layer of its gaussian pyramid
+    laplacian_pyramid.append(gaussian_pyramid[-1])
+    
+    #   Slight but harmless optimization -> return the gaussian pyramid along with the laplacian pyramid
+    return laplacian_pyramid, gaussian_pyramid
 
-def reconstruct_image(pyramid):
+def reconstruct_image(pyramid):     #   Coolest thing I learned in this lab activity
     """
         Reconstructs an image from a Laplacian pyramid.
 
@@ -121,6 +125,7 @@ def reconstruct_image(pyramid):
     reconstructed_image = pyramid[-1]
     
     #   Add up all the pyramid layers from the smallest layer up to the largest layer, reversing the process in construct_pyramids()
+    #   In reality, this is the same as: for i in range(1, invert(pyramid).length) but does not require an explicit invert() function
     for i in range(len(pyramid) - 2, -1, -1):
         reconstructed_image = interpolate(reconstructed_image) + pyramid[i]
         
@@ -138,17 +143,17 @@ def blend_pyramids(A, B, M):
         Returns:
                 blended_pyramid: a blended pyramid from two images and a mask.
     """
-    #   Retrieve Laplacian and Gaussian pyramids of images A and B, as well as the gaussian mask, assuming that they are all of the same dimensions
+    #   Retrieve laplacian pyramids of the two images and the gaussian pyramid of the mask
     LA , _ = construct_pyramids(A)
     LB , _ = construct_pyramids(B)
-    _ , GM = construct_pyramids(M)
+    GR = construct_gaussian_pyramid(M)
     
     blended_pyramid = [ ]
     
     #   Formula for blending pyramids that I lifted from the blackboard (amazing!)
-    for i in range(len(GM)):
-        LS = GM[i] / 255 * LA[i] + (1 - GM[i] /255) * LB[i]
-        blended_pyramid.append(bound(LS))   #   Bounding here blends the image colors as well! ~ found out after 3 weeks of experimentation (manifesting moved deadlines)
+    for i in range(len(GR)):
+        LS = GR[i] / 255 * LA[i] + (1 - GR[i] /255) * LB[i]
+        blended_pyramid.append((LS))    #   bound() here sort of blends the image colors as well! ~ found out after 3 weeks of experimentation (manifesting moved deadlines)
         
     return blended_pyramid
 

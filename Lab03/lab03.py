@@ -35,7 +35,7 @@ def show_image(name, image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-#   Helper method for saving an array-like of images (key is used as a filename identifier)
+#   Helper method for saving an array-like of images
 def save_images(images, key):
     #   Save and/or display each strip
     for i, strip in enumerate(images):

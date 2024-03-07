@@ -97,7 +97,7 @@ def construct_pyramids(image):
                 gaussian_pyramid: A sequence of corresponding Gaussian pyramids to max depth - 1.
     """
 
-    laplacian_pyramid = []
+    laplacian_pyramid = [ ]
     gaussian_pyramid = construct_gaussian_pyramid(image)
 
     #   Subtract layers to max depth, laplacian_i = gaussian_i - interpolate(gaussian_i+1)

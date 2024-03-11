@@ -10,7 +10,7 @@
 import cv2
 import numpy as np
 
-from thresholding import crop, canny_edge
+from thresholding import crop, canny_edge, isolate_colorspace, remove_colorspace
 
 #   TODO: Find a way to dynamically threshold an image: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
 def main():
@@ -31,13 +31,12 @@ def main():
     #   Preliminary investigation of images
     for label, path in sample_images.items():
         image = cv2.imread(path)
-        image = canny_edge(image)
-        #   Can pass parameters
-        #cropped_image = crop(image, x_lower=0, x_upper=2300, y_lower=250, y_upper=image.shape[0])
-        #   Defaults are provided if no parameters are passed
-        cropped_image = crop(image)
+        cropped_image = crop(image, x_lower=0, x_upper=2300, y_lower=500, y_upper=image.shape[0])
+        cropped_image = isolate_colorspace(cropped_image, [0, 10, 10], [10, 255, 255], (51, 51), (15, 15), 20, 10)
+        #cropped_image = canny_edge(cropped_image)
+        
         print(cropped_image.shape)
-        show_image(label, cropped_image)
+        show_image(label, cropped_image) 
         #break
 
     #   TODO: Find contours based on edges

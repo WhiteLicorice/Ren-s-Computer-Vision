@@ -10,7 +10,8 @@ def crop(
 ) -> np.ndarray:
     """
     Crops an image along the x and y axis. The x and y values must
-    be within bounds of the image.
+    be within bounds of the image. No check is performed to see
+    if x_lower < x_upper or y_lower < y_upper.
 
     Parameters:
             image: the original image
@@ -34,8 +35,8 @@ def canny_edge(
     image: np.ndarray,
     gaussian_kernel_size: tuple[int, int] = (5, 5),
     canny_lower: int = 50,
-    canny_upper: int = 225
-) -> np.ndarray:
+    canny_upper: int = 150
+) -> np.ndarray | np.ndarray:
     """
     Performs canny edge detection on an image. Automatically converts to greyscale
     and applies gaussian blur to reduce noise.
@@ -51,16 +52,18 @@ def canny_edge(
     """
     if gaussian_kernel_size is not None: assert gaussian_kernel_size[0] % 2 != 0 and gaussian_kernel_size[1] % 2 != 0, "Gaussian kernel dimensions must be odd."
     
-    # Convert the image to grayscale
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray_image = image
+    
+    if len(image.shape) == 3:
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply Gaussian blur to reduce noise
+    #   Apply Gaussian blur to reduce noise
     gray_image = cv2.GaussianBlur(gray_image, gaussian_kernel_size, 0)
 
-    # Perform Canny edge detection
+    #   Perform Canny edge detection
     canny_edges = cv2.Canny(gray_image, canny_lower, canny_upper)
 
-    return canny_edges
+    return canny_edges, gray_image
 
 import cv2
 import numpy as np
@@ -70,10 +73,12 @@ def isolate_colorspace(
     hsv_lower: list[int, int, int] = [0, 100, 100],
     hsv_upper: list[int, int, int] = [10, 255, 255],
     gaussian_kernel_size: tuple[int, int] = (5, 5),
-    morph_kernel_size: tuple[int, int] = (5, 5),
+    dilation_kernel_size: tuple[int, int] = (5, 5),
+    erosion_kernel_size: tuple[int, int] = (5, 5),
     dilation_iterations: int = 20,
     erosion_iterations: int = 1,
-):
+) -> np.ndarray:
+    
     """
         This function isolates a specific color space in an image using HSV thresholding and morphological operations.
 
@@ -98,61 +103,123 @@ def isolate_colorspace(
     if hsv_upper is not None: assert len(hsv_upper) == 3, "Tuple must be in HSV format."
     if hsv_lower is not None: assert hsv_lower[0] in range(0, 179 + 1) and hsv_lower[1] in range(0, 255 + 1) and hsv_lower[2] in range(0, 255 + 1), "HSV values out of range."
     if hsv_upper is not None: assert hsv_upper[0] in range(0, 179 + 1) and hsv_upper[1] in range(0, 255 + 1) and hsv_upper[2] in range(0, 255 + 1), "HSV values out of range."
-    if gaussian_kernel_size is not None: assert gaussian_kernel_size[0] % 2 != 0 and gaussian_kernel_size[1] % 2 != 0, "Gaussian kernel dimensions must be odd."
-    if morph_kernel_size is not None: assert morph_kernel_size[0] % 2 != 0 and morph_kernel_size[1] % 2 != 0, "Morphological kernel dimensions must be odd."
+    if gaussian_kernel_size is not None: assert gaussian_kernel_size == (0, 0) or (gaussian_kernel_size[0] % 2 != 0 and gaussian_kernel_size[1] % 2 != 0), "Gaussian kernel dimensions must be odd."
+    if dilation_kernel_size is not None: assert dilation_kernel_size == (0, 0) or (dilation_kernel_size[0] % 2 != 0 and dilation_kernel_size[1] % 2 != 0), "Dilation kernel dimensions must be odd."
+    if erosion_kernel_size is not None: assert erosion_kernel_size == (0, 0) or (erosion_kernel_size[0] % 2 != 0 and erosion_kernel_size[1] % 2 != 0), "Erosion kernel dimensions must be odd."
     if dilation_iterations is not None: assert dilation_iterations >= 0, "Dilation iterations must be a non-negative integer."
     if erosion_iterations is not None: assert erosion_iterations >= 0, "Erosion iterations must be a non-negative integer."
     
     #   Convert BGR to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    #   Apply Gaussian blur to reduce noise
-    blurred_image = cv2.GaussianBlur(image, gaussian_kernel_size, 0)
+    #   Apply gaussian_blur if parameter supplied
+    if gaussian_kernel_size != (0, 0):
+        #   Apply Gaussian blur to reduce noise
+        hsv_image = cv2.GaussianBlur(hsv_image, gaussian_kernel_size, 0)
     
-    #   Threshold the HSV image to get only red colors
-    mask = cv2.inRange(hsv, np.array(hsv_lower), np.array(hsv_upper))
+    #   Threshold the HSV image to get only some colors
+    mask = cv2.inRange(hsv_image, np.array(hsv_lower), np.array(hsv_upper))
     
-    if dilation_iterations != 0:
-        # Perform morphological dilation to fill gaps
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, morph_kernel_size)
+    if dilation_iterations != 0 and dilation_kernel_size != (0, 0):
+        #   Perform morphological dilation to fill gaps
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, dilation_kernel_size)
         mask = cv2.dilate(mask, kernel, iterations=dilation_iterations)
 
-    if erosion_iterations != 0:
-        # Perform erosion to remove background 
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, morph_kernel_size)
+    if erosion_iterations != 0 and erosion_kernel_size != (0, 0):
+        #   Perform erosion to remove background 
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, erosion_kernel_size)
         mask = cv2.erode(mask, kernel, iterations=erosion_iterations)
 
-    # Apply mask to the blurred image
-    isolated_image = cv2.bitwise_and(blurred_image, blurred_image, mask=mask)
+    #   Apply mask to the image
+    isolated_image = cv2.bitwise_and(hsv_image, hsv_image, mask=mask)
 
     return isolated_image
 
-
-def remove_colorspace(
+def naive_threshold(
     image: np.ndarray,
-    hsv_lower: list[int, int, int] = [40, 40, 40],
-    hsv_upper: list[int, int, int] = [70, 255, 255]
-):
-    assert len(image.shape) > 1, "Image must not be in grayscale."
-    if hsv_lower is not None: assert len(hsv_lower) == 3, "Tuple must be in HSV format."
-    if hsv_upper is not None: assert len(hsv_upper) == 3, "Tuple must be in HSV format."
-    if hsv_lower is not None: assert hsv_lower[0] in range(0, 179 + 1) and hsv_lower[1] in range(0, 255 + 1) and hsv_lower[2] in range(0, 255 + 1), "HSV values out of range."
-    if hsv_upper is not None: assert hsv_upper[0] in range(0, 179 + 1) and hsv_upper[1] in range(0, 255 + 1) and hsv_upper[2] in range(0, 255 + 1), "HSV values out of range."
+    lower_threshold: int = 100,
+    upper_threshold: int = 255
+) -> np.ndarray:
+    """
+        This function applies thresholding to an image.
 
-    # Convert BGR to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        Parameters:
+            image (np.ndarray): The input image.
+            lower_threshold (int): The lower threshold value.
+            upper_threshold (int): The upper threshold value.
 
-    # Define range of color to be removed in HSV
-    lower_bound = np.array(hsv_lower)
-    upper_bound = np.array(hsv_upper)
+        Returns:
+            np.ndarray: The thresholded image.
+    """
+        
+    #   Apply naive thresholding to an image
+    _, thresholded_image = cv2.threshold(image, lower_threshold, upper_threshold, cv2.THRESH_BINARY)
 
-    # Create a mask for the regions to be removed
-    removal_mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    return thresholded_image
 
-    # Invert the mask to keep the non-removed regions
-    removal_mask_inv = cv2.bitwise_not(removal_mask)
+def extract_black_regions(image):
+    """
+        Extracts black regions from an image and converts non-black regions to white.
 
-    # Apply the mask to remove the specified color range from the original image
-    image_without_color = cv2.bitwise_and(image, image, mask=removal_mask_inv)
+        Parameters:
+            image (numpy.ndarray): The input image in BGR format.
 
-    return image_without_color
+        Returns:
+            numpy.ndarray: Image with black regions extracted and non-black regions converted to white.
+    """
+    #   Convert the image to grayscale
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    #   Threshold the grayscale image to get black regions
+    _, black_regions = cv2.threshold(grayscale_image, 1, 255, cv2.THRESH_BINARY)
+    
+    #   Invert the black regions to get white regions for non-black areas
+    white_regions = cv2.bitwise_not(black_regions)
+    
+    #   Convert the white regions to BGR format for visualization
+    white_regions_bgr = cv2.cvtColor(white_regions, cv2.COLOR_GRAY2BGR)
+    
+    return white_regions_bgr
+
+def count_white_pixels(binary_image: np.ndarray) -> int:
+    """
+        Count the number of white pixels (255) in a binary image.
+
+        Parameters:
+            binary_image (np.ndarray): The binary image where white pixels are represented as 255.
+
+        Returns:
+            int: The number of white pixels in the binary image.
+    """
+    return np.count_nonzero(binary_image == 255)
+
+def detect_contours_canny(
+    image: np.ndarray,
+    gaussian_kernel_size: tuple[int, int] = (5, 5),
+    canny_lower: int = 50,
+    canny_upper: int = 150
+) -> np.ndarray:
+    """
+        Detects contours in an image using Canny edge detection and draws bounding boxes around the contours.
+
+        Parameters:
+            image (np.ndarray): The input image.
+            canny_threshold1 (int): The first threshold for the Canny edge detector. Default is 50.
+            canny_threshold2 (int): The second threshold for the Canny edge detector. Default is 150.
+
+        Returns:
+            np.ndarray: The image with bounding boxes drawn around detected contours.
+    """
+    
+    #   Retrieve canny edges
+    canny_edges, grey_image = canny_edge(image, gaussian_kernel_size, canny_lower, canny_upper)
+
+    #   Find contours in the Canny-edged image
+    contours, _ = cv2.findContours(canny_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    contoured_image = grey_image.copy()
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(contoured_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    return contoured_image

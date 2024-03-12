@@ -107,58 +107,9 @@ def test_naivethresholding():
         if IS_VERBOSE: print(f"{cropped_image.shape} : {count_white_pixels(cropped_image)}")
         show_image(f"{image_path}", image_path)
 
-<<<<<<< HEAD
 """UTILITIES"""
 #   Helper method to extract pixel count of the red fluid region in the images         
 def extraction_pipeline(image_path):
-=======
-    all_images = { }
-    unknown_images = { }
-    
-    #   Collate images into dictionary
-    all_images.update(_50ml_images)
-    all_images.update(_100ml_images)
-    all_images.update(_150ml_images)
-    all_images.update(_200ml_images)
-    all_images.update(_250ml_images)
-    all_images.update(_300ml_images)
-    all_images.update(_350ml_images)
-    unknown_images.update(_A_images)
-    unknown_images.update(_B_images)
-    unknown_images.update(_C_images)
-    
-    column_names = ['Volume(in ml)', 'PixelCount']
-    img_pixel_data = pd.DataFrame(columns=column_names)
-
-    #   Compute pixel values of the fluid in each image via naive thresholding
-    for directory, image_paths in all_images.items():
-        for image_path in image_paths:
-            img_white_pixel_count = img_pipeline(image_path)
-            
-            directory_int = int(directory[:-2])
-            
-            img_pixel_data.loc[len(img_pixel_data)] = [directory_int, img_white_pixel_count]
-                      
-            #print(f"{cropped_image.shape}: {img_white_pixel_count} units -> {directory_int}")
-            #show_image('Image', cropped_image)
-
-    model = LinearFunction()
-    model.fit(img_pixel_data)
-    print(f"Parameters:")
-    model.show_parameters()
-    print("\n")
-    
-    
-    for directory, image_paths in unknown_images.items():
-        print(f"Directory {directory}")
-        for image_path in image_paths:
-            img_white_pixel_count = img_pipeline(image_path)
-            prediction = model.predict(img_white_pixel_count)
-            print(f"{prediction}ml")
-        print("\n")
-                        
-def img_pipeline(image_path):
->>>>>>> dec589ee5a3f1225552a3fe64072176dc8518b3a
     #   Pipeline: crop image as close to the bottle as possible -> threshold image to black out the fluid -> invert the threshold to have fluid as white regions
     cropped_image = cv2.imread(image_path)
     #   Preprocess image to crop out the bottle

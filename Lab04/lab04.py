@@ -12,6 +12,7 @@
 import cv2
 import numpy as np
 import glob
+import pandas as pd
 
 from thresholding import crop, naive_threshold, extract_black_regions, count_white_pixels
 
@@ -55,28 +56,28 @@ def main():
     all_images.update(_B_images)
     all_images.update(_C_images)
     
-    data = np.empty((0, 2), dtype = [('Fluid Amount', 'U100'), ('Pixel Count', 'int32')])
+    column_names = ['Volume', 'PixelCount']
+    img_pixel_data = pd.DataFrame(columns=column_names)
 
     #   Compute pixel values of the fluid in each image via naive thresholding
     for directory, image_paths in all_images.items():
         for image_path in image_paths:
             #   Pipeline: crop image as close to the bottle as possible -> threshold image to black out the fluid -> invert the threshold to have fluid as white regions
             cropped_image = cv2.imread(image_path)
-            cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)
+            #   Preprocess image to crop out the bottle
+            cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)                    
             cropped_image = naive_threshold(cropped_image, 100, 225)
             cropped_image = extract_black_regions(cropped_image)
             
-            #   Compute pixel count of the fluid regions
-            pixel_count = count_white_pixels(cropped_image)
+            img_white_pixel_count = count_white_pixels(cropped_image)
             
-            print(f"{cropped_image.shape}: {pixel_count} px -> {directory}")
-            
-            #   Append computed values to the data array
-            data = np.append(data, np.array([(directory, pixel_count)], dtype=data.dtype))
-            
+            img_pixel_data.loc[len(img_pixel_data)] = [directory, img_white_pixel_count]
+                      
+            print(f"{cropped_image.shape}: {img_white_pixel_count} units -> {directory}")
             #show_image('Image', cropped_image)
-            #break
-    #print(data)
+            
+
+        
 #   Helper method to show an image
 def show_image(image_label, image):
     #   Show image in a normal window

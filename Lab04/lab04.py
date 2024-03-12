@@ -43,6 +43,7 @@ def main():
     _C_images = collect_images('C')
 
     all_images = { }
+    unknown_images = { }
     
     #   Collate images into dictionary
     all_images.update(_50ml_images)
@@ -52,31 +53,45 @@ def main():
     all_images.update(_250ml_images)
     all_images.update(_300ml_images)
     all_images.update(_350ml_images)
-    all_images.update(_A_images)
-    all_images.update(_B_images)
-    all_images.update(_C_images)
+    unknown_images.update(_A_images)
+    unknown_images.update(_B_images)
+    unknown_images.update(_C_images)
     
-    column_names = ['Volume', 'PixelCount']
+    column_names = ['Volume(in ml)', 'PixelCount']
     img_pixel_data = pd.DataFrame(columns=column_names)
 
     #   Compute pixel values of the fluid in each image via naive thresholding
     for directory, image_paths in all_images.items():
         for image_path in image_paths:
-            #   Pipeline: crop image as close to the bottle as possible -> threshold image to black out the fluid -> invert the threshold to have fluid as white regions
-            cropped_image = cv2.imread(image_path)
-            #   Preprocess image to crop out the bottle
-            cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)                    
-            cropped_image = naive_threshold(cropped_image, 100, 225)
-            cropped_image = extract_black_regions(cropped_image)
+            img_white_pixel_count = img_pipeline(image_path)
             
-            img_white_pixel_count = count_white_pixels(cropped_image)
+            directory_int = int(directory[:-2])
             
-            img_pixel_data.loc[len(img_pixel_data)] = [directory, img_white_pixel_count]
+            img_pixel_data.loc[len(img_pixel_data)] = [directory_int, img_white_pixel_count]
                       
-            print(f"{cropped_image.shape}: {img_white_pixel_count} units -> {directory}")
+            #print(f"{cropped_image.shape}: {img_white_pixel_count} units -> {directory_int}")
             #show_image('Image', cropped_image)
-            
 
+    model = LinearFunction()
+    model.fit(img_pixel_data)
+    print(f"Parameters: {model.show_parameters()}\n")
+    
+    
+    for directory, image_paths in unknown_images.items():
+        print(f"Directory {directory}\n")
+        for image_path in image_paths:
+            img_white_pixel_count = img_pipeline(image_path)
+            prediction = model.predict(img_white_pixel_count)
+            print(f"{prediction}ml")
+                        
+def img_pipeline(image_path):
+    #   Pipeline: crop image as close to the bottle as possible -> threshold image to black out the fluid -> invert the threshold to have fluid as white regions
+    cropped_image = cv2.imread(image_path)
+    #   Preprocess image to crop out the bottle
+    cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)                    
+    cropped_image = naive_threshold(cropped_image, 100, 225)
+    cropped_image = extract_black_regions(cropped_image)
+    return count_white_pixels(cropped_image)
         
 #   Helper method to show an image
 def show_image(image_label, image):
@@ -86,6 +101,25 @@ def show_image(image_label, image):
     cv2.imshow(image_label, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+class LinearFunction:
+    def __init__(self):
+        self.slope = 0
+        self.intercept = 0
+    
+    def fit(self, data):
+        y = data["Volume(in ml)"].values  
+        X = data["PixelCount"].values
+        
+        self.slope, self.intercept = np.polyfit(X, y, 1)
+
+    def predict(self, input):
+        return self.slope * input + self.intercept
+        
+    def show_parameters(self):
+        print("Slope:", self.slope)
+        print("Intercept:", self.intercept)
+    
 
 #   Helper method for collecting all the images in a directory  
 def collect_images(input_directory):

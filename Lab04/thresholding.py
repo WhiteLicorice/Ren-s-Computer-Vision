@@ -31,6 +31,7 @@ def crop(
     
     return cropped_image
 
+@DeprecationWarning
 def canny_edge(
     image: np.ndarray,
     gaussian_kernel_size: tuple[int, int] = (5, 5),
@@ -65,9 +66,39 @@ def canny_edge(
 
     return canny_edges, gray_image
 
-import cv2
-import numpy as np
+@DeprecationWarning
+def detect_contours_canny(
+    image: np.ndarray,
+    gaussian_kernel_size: tuple[int, int] = (5, 5),
+    canny_lower: int = 50,
+    canny_upper: int = 150
+) -> np.ndarray:
+    """
+        Detects contours in an image using Canny edge detection and draws bounding boxes around the contours.
 
+        Parameters:
+            image (np.ndarray): The input image.
+            canny_threshold1 (int): The first threshold for the Canny edge detector. Default is 50.
+            canny_threshold2 (int): The second threshold for the Canny edge detector. Default is 150.
+
+        Returns:
+            np.ndarray: The image with bounding boxes drawn around detected contours.
+    """
+    
+    #   Retrieve canny edges
+    canny_edges, grey_image = canny_edge(image, gaussian_kernel_size, canny_lower, canny_upper)
+
+    #   Find contours in the Canny-edged image
+    contours, _ = cv2.findContours(canny_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    contoured_image = grey_image.copy()
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(contoured_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    return contoured_image
+
+@DeprecationWarning
 def isolate_colorspace(
     image: np.ndarray,
     hsv_lower: list[int, int, int] = [0, 100, 100],
@@ -141,7 +172,7 @@ def naive_threshold(
     upper_threshold: int = 255
 ) -> np.ndarray:
     """
-        This function applies thresholding to an image.
+        This function applies naive thresholding to an image.
 
         Parameters:
             image (np.ndarray): The input image.
@@ -152,12 +183,12 @@ def naive_threshold(
             np.ndarray: The thresholded image.
     """
         
-    #   Apply naive thresholding to an image
+    #   Apply naive thresholding to an image, setting pixels not within [lower_threshold, upper_threshold] to 0
     _, thresholded_image = cv2.threshold(image, lower_threshold, upper_threshold, cv2.THRESH_BINARY)
 
     return thresholded_image
 
-def extract_black_regions(image):
+def extract_black_regions(image: np.ndarray) -> np.ndarray:
     """
         Extracts black regions from an image and converts non-black regions to white.
 
@@ -193,33 +224,38 @@ def count_white_pixels(image: np.ndarray) -> int:
     """
     return np.count_nonzero(image == 255)
 
-def detect_contours_canny(
-    image: np.ndarray,
-    gaussian_kernel_size: tuple[int, int] = (5, 5),
-    canny_lower: int = 50,
-    canny_upper: int = 150
-) -> np.ndarray:
+class LinearRegression:
     """
-        Detects contours in an image using Canny edge detection and draws bounding boxes around the contours.
+        A LinearRegression class that represents a simple linear regression model.
 
-        Parameters:
-            image (np.ndarray): The input image.
-            canny_threshold1 (int): The first threshold for the Canny edge detector. Default is 50.
-            canny_threshold2 (int): The second threshold for the Canny edge detector. Default is 150.
+        This class provides methods to fit the model to data, make predictions, and retrieve the model parameters.
 
-        Returns:
-            np.ndarray: The image with bounding boxes drawn around detected contours.
+        Attributes:
+            slope (float): The slope of the linear regression line.
+            intercept (float): The y-intercept of the linear regression line.
+
+        Methods:
+            __init__(): Initializes the LinearRegression object with default slope and intercept values.
+            __str__(): Returns a string representation of the linear regression equation.
+            fit(data): Fits the linear regression model to the given data.
+            predict(input): Predicts the output value based on the input using the linear regression equation.
+            get_parameters(): Returns the slope and intercept of the linear regression model.
     """
+    def __init__(self):
+        self.slope = 0
+        self.intercept = 0
     
-    #   Retrieve canny edges
-    canny_edges, grey_image = canny_edge(image, gaussian_kernel_size, canny_lower, canny_upper)
+    def __str__(self):
+        return f"Y = {self.slope}(X) + {self.intercept}"
+    
+    def fit(self, data):
+        x = data["PixelCount"].values
+        y = data["Volume(in ml)"].values
+        self.slope, self.intercept = np.polyfit(x, y, 1)
 
-    #   Find contours in the Canny-edged image
-    contours, _ = cv2.findContours(canny_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    contoured_image = grey_image.copy()
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(contoured_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    return contoured_image
+    #   y = mx + b, since we have observed a linear relationship between the pixel count and the expected volume of the red liquid
+    def predict(self, input):
+        return self.slope * input + self.intercept
+        
+    def get_parameters(self):
+        return self.slope, self.intercept

@@ -39,37 +39,32 @@ def main():
     _B_images = collect_images('B')
     _C_images = collect_images('C')
 
-    all_images = [ ]
+    all_images = { }
+    
+    #   Collate images into dictionary
+    all_images.update(_50ml_images)
+    all_images.update(_100ml_images)
+    all_images.update(_150ml_images)
+    all_images.update(_200ml_images)
+    all_images.update(_250ml_images)
+    all_images.update(_300ml_images)
+    all_images.update(_350ml_images)
+    all_images.update(_A_images)
+    all_images.update(_B_images)
+    all_images.update(_C_images)
 
-    #   Append images from all the collected directories
-    all_images.extend(_50ml_images)
-    all_images.extend(_100ml_images)
-    all_images.extend(_150ml_images)
-    all_images.extend(_200ml_images)
-    all_images.extend(_250ml_images)
-    all_images.extend(_300ml_images)
-    all_images.extend(_350ml_images)
-    all_images.extend(_A_images)
-    all_images.extend(_B_images)
-    all_images.extend(_C_images)
-
-    #   Preliminary investigation of images
-    for image_path in all_images:
-        cropped_image = cv2.imread(image_path)
-        #   Preprocess image to crop out the bottle
-        cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)
-        #cropped_image = crop(cropped_image, x_lower=0, x_upper=2300, y_lower=500)
-        
-        #cropped_image = isolate_colorspace(cropped_image, hsv_lower=[0, 10, 10], hsv_upper=[10, 255, 255], gaussian_kernel_size=(51, 51), dilation_kernel_size=(21, 21), erosion_kernel_size=(3, 3), dilation_iterations=20, erosion_iterations=3)
-        
-        cropped_image = naive_threshold(cropped_image, 100, 225)
-        cropped_image = extract_black_regions(cropped_image)
-        
-        #cropped_image, _ = canny_edge(cropped_image)
-        #cropped_image = detect_contours_canny(cropped_image)
-        
-        print(f"{cropped_image.shape}: {count_white_pixels(cropped_image)} units -> {image_path}")
-        #show_image('Image', cropped_image) 
+    #   Compute pixel values of the fluid in each image via naive thresholding
+    for directory, image_paths in all_images.items():
+        for image_path in image_paths:
+            #   Pipeline: crop image as close to the bottle as possible -> threshold image to black out the fluid -> invert the threshold to have fluid as white regions
+            cropped_image = cv2.imread(image_path)
+            cropped_image = crop(cropped_image, x_lower=1500, x_upper=2000, y_lower=550, y_upper=1500)
+            cropped_image = naive_threshold(cropped_image, 100, 225)
+            cropped_image = extract_black_regions(cropped_image)
+            
+            print(f"{cropped_image.shape}: {count_white_pixels(cropped_image)} px -> {directory}")
+            #show_image('Image', cropped_image)
+            #break
         
 #   Helper method to show an image
 def show_image(image_label, image):
@@ -84,8 +79,7 @@ def show_image(image_label, image):
 def collect_images(input_directory):
     search_pattern = f"input/{input_directory}/*.jpg"
     image_files = glob.glob(search_pattern)
-    return image_files
-
+    return {input_directory: image_files}
 
 if __name__ == "__main__":
     main()

@@ -181,9 +181,9 @@ def extract_black_regions(image):
     
     return white_regions_bgr
 
-def count_white_pixels(binary_image: np.ndarray) -> int:
+def count_white_pixels(image: np.ndarray) -> int:
     """
-        Count the number of white pixels (255) in a binary image.
+        Count the number of white pixels (255) in an image.
 
         Parameters:
             binary_image (np.ndarray): The binary image where white pixels are represented as 255.
@@ -191,7 +191,7 @@ def count_white_pixels(binary_image: np.ndarray) -> int:
         Returns:
             int: The number of white pixels in the binary image.
     """
-    return np.count_nonzero(binary_image == 255)
+    return np.count_nonzero(image == 255)
 
 def detect_contours_canny(
     image: np.ndarray,

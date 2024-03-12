@@ -4,7 +4,9 @@
     Date Modified: 03/08/2024 
     Usage: python lab04.py
     Description:
-        TODO: Place activity description here.
+        The goal of this laboratory exercise is to estimate the amount of liquid contained in a bottle.
+        The directory 'guess' contains images of the bottle with unknown amounts of liquid. You are to guess these amounts.
+        OpenCV image filtering, thresholding, or morphology operations are allowed.
 """
 
 import cv2
@@ -52,6 +54,8 @@ def main():
     all_images.update(_A_images)
     all_images.update(_B_images)
     all_images.update(_C_images)
+    
+    data = np.empty((0, 2), dtype = [('Fluid Amount', 'U100'), ('Pixel Count', 'int32')])
 
     #   Compute pixel values of the fluid in each image via naive thresholding
     for directory, image_paths in all_images.items():
@@ -62,10 +66,17 @@ def main():
             cropped_image = naive_threshold(cropped_image, 100, 225)
             cropped_image = extract_black_regions(cropped_image)
             
-            print(f"{cropped_image.shape}: {count_white_pixels(cropped_image)} px -> {directory}")
+            #   Compute pixel count of the fluid regions
+            pixel_count = count_white_pixels(cropped_image)
+            
+            print(f"{cropped_image.shape}: {pixel_count} px -> {directory}")
+            
+            #   Append computed values to the data array
+            data = np.append(data, np.array([(directory, pixel_count)], dtype=data.dtype))
+            
             #show_image('Image', cropped_image)
             #break
-        
+    #print(data)
 #   Helper method to show an image
 def show_image(image_label, image):
     #   Show image in a normal window

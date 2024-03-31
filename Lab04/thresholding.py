@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 def crop(
     image: np.ndarray, 
@@ -244,14 +245,16 @@ class LinearRegression:
     def __init__(self):
         self.slope = 0
         self.intercept = 0
+        self.x = 0
+        self.y = 0
     
     def __str__(self):
         return f"Y = {self.slope}(X) + {self.intercept}"
     
     def fit(self, data):
-        x = data["PixelCount"].values
-        y = data["Volume(in ml)"].values
-        self.slope, self.intercept = np.polyfit(x, y, 1)
+        self.x = data["PixelCount"].values
+        self.y = data["Volume(in ml)"].values
+        self.slope, self.intercept = np.polyfit(self.x, self.y, 1)
 
     #   y = mx + b, since we have observed a linear relationship between the pixel count and the expected volume of the red liquid
     def predict(self, input):
@@ -259,3 +262,21 @@ class LinearRegression:
         
     def get_parameters(self):
         return self.slope, self.intercept
+    
+    def show_graph(self):
+        x_values = np.linspace(150000, 800000)
+        y_values = self.slope * x_values + self.intercept
+        
+        # Plotting the line
+        plt.plot(x_values, y_values, label='y = {}x + {}'.format(self.slope, self.intercept))
+        plt.plot(self.x, self.y)
+
+        # Adding labels and title
+        plt.ylabel('Volume (in ml)')
+        plt.xlabel('PixelCount')
+        plt.title('Plotting a Line using Slope and Y-intercept')
+        plt.legend()
+
+        # Display the plot
+        plt.grid(True)
+        plt.show()

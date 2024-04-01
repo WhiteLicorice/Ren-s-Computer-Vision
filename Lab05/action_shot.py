@@ -45,8 +45,13 @@ def create_action_shot(frames_folder):
         fg_mask = background_subtractor.apply(frame)
         action_frames.append(cv2.bitwise_and(frame, frame, mask=fg_mask))
 
-    #   Combine frames into action shot
-    action_shot = cv2.hconcat(action_frames)    ##  TODO: Instead of horizontally stitching frames, overlay them on top of each other.
+    #   Overlay action frames onto the first frame
+    #   Use the first frame as the background
+    action_shot = frames[0].copy()  
+    
+    ##  TODO: Make the frames not transparent
+    for action_frame in action_frames[1:]:
+        action_shot = cv2.add(action_shot, action_frame)  #     Overlay action frame onto the background
 
     return action_shot
 

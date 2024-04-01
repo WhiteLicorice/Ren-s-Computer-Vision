@@ -20,6 +20,7 @@
 import cv2
 import glob
 import matplotlib.pyplot as plt
+import time
 
 from stitching import *
 
@@ -75,10 +76,15 @@ def test_find_best_matches():
     plot_image("Matches", matched_image)
     
 def test_image_stitching():
-    image1 = cv2.imread("IMG1.jpg")
-    image2 = cv2.imread("IMG2.jpg")
+    start = time.time()
+    
+    image1 = cv2.imread("data/IMG1.jpg")
+    image2 = cv2.imread("data/IMG2.jpg")
     
     stitched_image = stitch_image(image1, image2)
+    
+    end = time.time()
+    print("Time elapsed: ", end - start)
     
     show_image("Stitched Image", stitched_image)
     

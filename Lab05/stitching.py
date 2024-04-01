@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-def cv2_stitch(img_list: list) -> np.ndarray:
+def cv2_stitch(img_list: list, method: str = 'affine') -> np.ndarray:
     """
     Stitches an array of images together using the high level Stitcher class from cv2.
     Used as a reference to see the best output.
@@ -11,15 +11,29 @@ def cv2_stitch(img_list: list) -> np.ndarray:
     Returns:
             stitched_img: the image stitched from the supplied images
     """
-
-    imgStitcher = cv2.Stitcher_create()
-    error, stitched_img = imgStitcher.stitch(img_list)
     
-    if not error:
-        return stitched_img
-    else: 
-        raise Exception(f"Error in stitching image via cv2 stitcher has occured: {error}")
+    stitcher = None
+    
+    if method == 'perspective':
+        stitcher = cv2.Stitcher_create()
+    elif method == 'affine':
+        stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
+    else:
+        raise ValueError("Invalid stitching method. Supported methods are 'perspective' and 'affine'.")
 
+    status, stitched_img = stitcher.stitch(img_list)
+
+    if status == cv2.Stitcher_OK:
+        return stitched_img
+    elif status == cv2.Stitcher_ERR_NEED_MORE_IMGS:
+        raise Exception("Insufficient images provided for stitching.")
+    elif status == cv2.Stitcher_ERR_HOMOGRAPHY_EST_FAIL:
+        raise Exception("Homography estimation failed during stitching.")
+    elif status == cv2.Stitcher_ERR_CAMERA_PARAMS_ADJUST_FAIL:
+        raise Exception("Camera parameter adjustment failed during stitching.")
+    else:
+        raise Exception(f"Error in stitching image via cv2 stitcher has occurred: {status}")
+    
 def convert_to_gray(image: np.ndarray) -> tuple:
     """
     Converts the input images to grayscale.
@@ -148,6 +162,8 @@ def bound_image(blended_image: np.ndarray) -> np.ndarray:
     #   Define upper and lower bounds for each channel
     lower = (1, 1, 1)
     upper = (255, 255, 255)
+    # Create the mask for white pixel finding
+    # Retrieves the pixels within the bounds as boolean, then .astype(np.uint8) * 255 makes it white for mask
     mask = cv2.inRange(blended_image, lower, upper)
 
     #   Get white pixel bounds via the coordinates
@@ -169,10 +185,12 @@ def pad_image(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     Returns:
         numpy.ndarray: Padded image.
     """
-    
+    height = int(image1.shape[0]) 
+    width = int(image1.shape[1])
+
     padded_image = cv2.copyMakeBorder(image2, 
-                                       int(image1.shape[0]), int(image1.shape[0]), 
-                                       int(image1.shape[1]), int(image1.shape[1]), 
+                                       height, height, 
+                                       width, width, 
                                        cv2.BORDER_CONSTANT, value=0)
     return padded_image
 

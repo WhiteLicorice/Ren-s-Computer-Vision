@@ -140,23 +140,30 @@ def test_complete_action_shot():
     #   Initialize KNN background subtractor
     fgbg = cv2.createBackgroundSubtractorMOG2()
     
-    # Compute the median of aligned frames to estimate the background
-    aligned_frames = [reference_frame] + aligned_frames  # Include reference frame
-    background = np.median(aligned_frames, axis=0).astype(np.uint8)
+    # Compute the median of all frames to estimate the background
+    
+    background = np.median(frames, axis=0).astype(np.uint8)
 
+    
+    #   Apply background subtraction and overlay the moving objects on the background using multi-layer blending
+    aligned_frames = [reference_frame] + aligned_frames  # Include reference frame
+    blended_result = background.copy()
     i = 0
-    # Apply background subtraction to aligned frames
+    #   Apply background subtraction to aligned frames
     for frame in aligned_frames:
         fgmask = fgbg.apply(frame)
 
-        #   Create resulting shot by overlaying the moving object on the background TODO: Use this line for MOG2
-        result = cv2.copyTo(frame, fgmask, background)
+        ##  TODO: This sort of works, but the overlayed images are transparent. Look into other methods of blending.
+        #   Create a mask for the current action frame
+        action_mask = np.zeros_like(background)
+        action_mask[fgmask > 0] = 255
 
-        #   Apply the mask to the frame to achieve background subtraction # TODO: Use this line for KNN, quite buggy
-        #result = cv2.bitwise_and(frame, frame, mask=fgmask)
-        
-        show_image('Action Shot', result)
-        save_image(result, f"action_{i}")
+        #   Perform alpha blending between the action frame and the background
+        alpha = 0.5  # TODO: Adjust the alpha value as needed
+        blended_result = cv2.addWeighted(blended_result, 1 - alpha, frame, alpha, 0)
+
+        show_image('Action Shot', blended_result)
+        save_image(blended_result, f"action_{i}")
         i+=1
         
 

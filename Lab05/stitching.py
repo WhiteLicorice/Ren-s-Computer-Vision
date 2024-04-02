@@ -110,8 +110,8 @@ def select_top_matches(matches: list, num_matches: int = 50) -> list:
     Returns:
         list: List of selected matches.
     """
-    selected_matches = sorted(matches, key=lambda match: match.distance)[:num_matches]
-    return selected_matches
+    good_matches = sorted(matches, key=lambda match: match.distance)[:num_matches]            
+    return good_matches
 
 def estimate_homography(keypoints1: list, keypoints2: list, selected_matches: list, ransac_threshold: int = 10) -> np.ndarray:
     """

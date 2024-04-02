@@ -21,6 +21,7 @@ import cv2
 import glob
 import matplotlib.pyplot as plt
 import time
+import os
 
 from stitching import *
 
@@ -134,6 +135,24 @@ def fetch_images(directory, file_type):
         imgs.append(img_read)
         
     return imgs
+
+def delete_images(directory, file_type):
+    files = glob.glob(f'{directory}/*.{file_type}')
+    for f in files:
+        os.remove(f)
+
+def save_image(image, file_name, target_path="output", extension='jpg'):
+    # Ensure target directory exists
+    if not os.path.exists(target_path):
+        os.makedirs(target_path)
+        print(f"Directory '{target_path}' didn't exist, created it.")
+
+    # Write the image
+    try:
+        cv2.imwrite(f"{target_path}/{file_name}.{extension}", image)
+        print(f"Image '{file_name}.{extension}' saved successfully to '{target_path}' directory.")
+    except Exception as e:
+        print(f"Error occurred while saving the image: {e}")
     
 if __name__ == "__main__":
     main()

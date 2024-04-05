@@ -77,19 +77,46 @@ def test_find_best_matches():
     plot_image("Matches", matched_image)
     
 def test_image_stitching():
+    img_ratio = 1
     start = time.time()
     
-    image1 = cv2.imread("data/IMG1.jpg")
-    image2 = cv2.imread("data/IMG2.jpg")
+    #   Fetch images
+    img_list = fetch_images(directory="data", file_type="jpg")
+
+    #   New processed image (if img_ratio is not set to 1)
+    new_img_list = []
+    for i in range(len(img_list)):
+        height, width = img_list[i].shape[:2]
+        width = int(width/img_ratio)
+        height = int(height/img_ratio)
+        img = cv2.resize(img_list[i], (width,height))
+        new_img_list.append(img)
     
-    stitched_image = stitch_image(image1, image2)
+    #   Initial stitched image
+    stitched_image = stitch_image(new_img_list[0], new_img_list[1])
+    #   Index for while loop    
+    i = 2
     
+    while i != len(new_img_list):
+        stitched_image = stitch_image(new_img_list[i], stitched_image)
+        #   Place the unmatched image at the end of list
+        if stitched_image is None:
+            skip = new_img_list.pop(i)
+            new_img_list.append(skip)
+            #   Load saved point
+            stitched_image = cv2.imread(f"results/image_test{i-1}.jpg")
+            #print("Skip")
+        #   Proceed with next image
+        else:
+            #   Save point
+            cv2.imwrite(f"results/image_test{i}.jpg", stitched_image)
+            i+=1
+           
     end = time.time()
     print("Time elapsed: ", end - start)
-    
+
     show_image("Stitched Image", stitched_image)
-    
-    cv2.imwrite("image_test.jpg", stitched_image)
+    save_image(stitched_image, "image_test")
     
 def test_pad_image():
     image1 = cv2.imread("IMG1.jpg")

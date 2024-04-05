@@ -3,3 +3,7 @@ data
 __pycache__
 *.jpg
 output
+results
+dataTest
+image_test.jpg
+stitching.py

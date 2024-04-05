@@ -1,6 +1,10 @@
 import numpy as np
 import cv2
-def cv2_stitch(img_list: list, method: str = 'affine') -> np.ndarray:
+from blending import test_blending
+from lab05 import show_image
+from skimage.morphology import binary_closing, binary_opening
+
+def cv2_stitch(img_list: list, method: str = 'perspective') -> np.ndarray:
     """
     Stitches an array of images together using the high level Stitcher class from cv2.
     Used as a reference to see the best output.
@@ -67,35 +71,31 @@ def extract_sift(image: np.ndarray) -> tuple:
 def match_descriptors(
     descriptors1: np.ndarray,
     descriptors2: np.ndarray,
-    index_algorithm: str = "autotuned",
-    num_trees: int = 5,
-    num_checks: int = 50) -> list:
+    matcher_type : str = 'bruteforce') -> list:
     """
-    Matches descriptors between two sets using FLANN matching.
+    Matches descriptors between two sets using Brute Force matching.
 
     Parameters:
         descriptors1 (numpy.ndarray): Descriptors from the first set of keypoints.
         descriptors2 (numpy.ndarray): Descriptors from the second set of keypoints.
-        index_algorithm (string): The algorithm to be used for FLANN indexing.  
-        num_trees: The number of trees to use in the FLANN indexing structure.
-        num_checks: The number of checks performed in the nearest-neighbor search.
         
     Returns:
         matches: List of matches.
     """
-        
-    _algorithm = None
     
-    match index_algorithm.lower():
-        case "kdtree": _algorithm = 0
-        case "kmeans": _algorithm = 1
-        case "composite": _algorithm = 2
-        case "autotuned": _algorithm = 3
-        case _: raise Exception ("Algorithm undefined.")
-        
-    index_params = dict(algorithm=_algorithm, trees=num_trees)
-    search_params = dict(checks=num_checks)
-    matcher = cv2.FlannBasedMatcher(index_params, search_params)
+    matcher = None
+    
+    match matcher_type:
+        case 'bruteforce': 
+            #   NORM_L2 should be used with BFMatcher according to cv2 documenations
+            #   crossCheck returns only consistent pair of matches, serving as an alternative to Lowe's ratio test
+            matcher = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+        case 'flann':
+            #   Use autotuned to let cv2 decide the best algorithm based on the dataset
+            index_params = dict(algorithm="autotuned", trees=5)
+            search_params = dict(checks=50)
+            matcher = cv2.FlannBasedMatcher(index_params, search_params)
+            
     matches = matcher.match(descriptors1, descriptors2)
     return matches
 
@@ -110,7 +110,7 @@ def select_top_matches(matches: list, num_matches: int = 50) -> list:
     Returns:
         list: List of selected matches.
     """
-    good_matches = sorted(matches, key=lambda match: match.distance)[:num_matches]            
+    good_matches = sorted(matches, key=lambda match: match.distance)[:num_matches]
     return good_matches
 
 def estimate_homography(keypoints1: list, keypoints2: list, selected_matches: list, ransac_threshold: int = 10) -> np.ndarray:
@@ -128,6 +128,8 @@ def estimate_homography(keypoints1: list, keypoints2: list, selected_matches: li
     src_points = np.float32([keypoints1[match.queryIdx].pt for match in selected_matches]).reshape(-1, 1, 2)
     dst_points = np.float32([keypoints2[match.trainIdx].pt for match in selected_matches]).reshape(-1, 1, 2)
     homography, _ = cv2.findHomography(src_points, dst_points, cv2.RANSAC, ransacReprojThreshold=ransac_threshold)
+    #print(homography)
+    
     return homography
 
 def blend_images(image1: np.ndarray, image2: np.ndarray, homography: np.ndarray, alpha: float = 0.5) -> np.ndarray:
@@ -143,9 +145,31 @@ def blend_images(image1: np.ndarray, image2: np.ndarray, homography: np.ndarray,
     Returns:
         numpy.ndarray: Blended image.
     """
+ 
     result = cv2.warpPerspective(image1, homography, (image2.shape[1], image2.shape[0]))
-    blended_image = cv2.addWeighted(result, alpha, image2, 1 - alpha, 0)
-    return blended_image
+    
+    #   Get the intersection
+    mask = (result != 0) & (image2 != 0)
+    #   Refine the mask and remove any discrepancies
+    mask = binary_closing(mask)
+    mask = binary_opening(mask)
+    
+    #   Make a grey mask
+    mask = mask.astype(np.uint8) * 255
+    
+    #   Normalize the images
+    mask = mask / 255.0
+    result = result / 255.0
+    image2 = image2 / 255.0
+    
+    #   Remove the part of image where mask is
+    for i in range(3):
+        image2[:,:,i] *= (1 - mask[:,:,0])
+
+    blended_image = cv2.addWeighted(result, 1, image2, 1, 0)
+    
+    #   Denormalize image
+    return (blended_image * 255).clip(0, 255).astype(np.uint8)
 
 def bound_image(blended_image: np.ndarray) -> np.ndarray:
     """
@@ -162,8 +186,9 @@ def bound_image(blended_image: np.ndarray) -> np.ndarray:
     #   Define upper and lower bounds for each channel
     lower = (1, 1, 1)
     upper = (255, 255, 255)
-    # Create the mask for white pixel finding
-    # Retrieves the pixels within the bounds as boolean, then .astype(np.uint8) * 255 makes it white for mask
+    
+    #   Create the mask for white pixel finding
+    #   Retrieve the pixels within the bounds as boolean, then .astype(np.uint8) * 255 makes it white for mask
     mask = cv2.inRange(blended_image, lower, upper)
 
     #   Get white pixel bounds via the coordinates
@@ -188,13 +213,14 @@ def pad_image(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     height = int(image1.shape[0]) 
     width = int(image1.shape[1])
 
+    #   Create a black padded image based on the first image, with the second image at the center
     padded_image = cv2.copyMakeBorder(image2, 
                                        height, height, 
                                        width, width, 
                                        cv2.BORDER_CONSTANT, value=0)
     return padded_image
 
-def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, alpha: float = 0.5) -> None:
+def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, alpha: float = 0.9) -> None:
     """
     Blends two images using keypoint matching and homography estimation.
 
@@ -226,6 +252,10 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, 
 
     #   Estimate homography
     homography = estimate_homography(keypoints1, keypoints2, selected_matches)
+    
+    #   Skip space themed warp
+    if homography[1][1] < 0 or homography[1][1] > 2:
+        return None
 
     #   Blend images
     blended_image = blend_images(image1, image2, homography, alpha)
@@ -234,3 +264,4 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, 
     stitched_image = bound_image(blended_image)
 
     return stitched_image
+    

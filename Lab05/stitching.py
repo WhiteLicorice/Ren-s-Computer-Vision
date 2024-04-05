@@ -78,6 +78,7 @@ def match_descriptors(
     Parameters:
         descriptors1 (numpy.ndarray): Descriptors from the first set of keypoints.
         descriptors2 (numpy.ndarray): Descriptors from the second set of keypoints.
+        matcher_type (string): The type of matcher to use.
         
     Returns:
         matches: List of matches.

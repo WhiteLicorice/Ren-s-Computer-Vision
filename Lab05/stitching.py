@@ -73,7 +73,7 @@ def match_descriptors(
     descriptors2: np.ndarray,
     matcher_type : str = 'bruteforce') -> list:
     """
-    Matches descriptors between two sets using Brute Force matching.
+    Matches descriptors between two sets using a specified matcher.
 
     Parameters:
         descriptors1 (numpy.ndarray): Descriptors from the first set of keypoints.

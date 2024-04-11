@@ -140,10 +140,22 @@ def test_image_stitching():
     img8 = cv2.imread("data/IMG8.jpg")
     img9 = cv2.imread("data/IMG9.jpg")
     
+    # show_image("Image 1", img1)
+    # show_image("Image 2", img2)
+    # show_image("Image 3", img3)
+    # show_image("Image 4", img4)
+    # show_image("Image 5", img5)
+    # show_image("Image 6", img6)
+    # show_image("Image 7", img7)
+    # show_image("Image 8", img8)
+    # show_image("Image 9", img9)
+
     img1_2_3 = stitch_image(stitch_image(img1, img2), img3)
     show_image("Image 1, 2, 3", img1_2_3)
     save_image(img1_2_3, "img123")
     
+    ##  TODO:::
+    ##  These two lines do not work for some reason
     img4_5_6 = stitch_image(stitch_image(img4, img5), img6)
     show_image("Image 4, 5, 6", img4_5_6)
     save_image(img4_5_6, "img456")

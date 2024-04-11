@@ -193,7 +193,7 @@ def bound_image(blended_image: np.ndarray) -> np.ndarray:
     white = np.where(mask == 255)
     xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
 
-    #   bound image using the coordinates
+    #   Bound image using the coordinates
     bound_image = blended_image[ymin:ymax, xmin:xmax]
     return bound_image
 
@@ -261,6 +261,8 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, 
     #   Fetch final stitched image
     stitched_image = bound_image(blended_image)
 
+    assert stitched_image is not None, "Failed to stitch image. Perhaps matches are insufficient?"
+    
     return stitched_image
 
 #   Imported as is from Lab04/thresholding.py

@@ -251,9 +251,10 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, 
     #   Estimate homography
     homography = estimate_homography(keypoints1, keypoints2, selected_matches)
     
-    #   Skip space themed warp
-    if homography[1][1] < 0 or homography[1][1] > 2:
-        return None
+    ##  TODO: Diagnose this line
+    # #   Skip space themed warp
+    # if homography[1][1] < 0 or homography[1][1] > 2:
+    #     return None
 
     #   Blend images
     blended_image = blend_images(image1, image2, homography, alpha)

@@ -180,6 +180,37 @@ def save_image(image, file_name, target_path="output", extension='jpg'):
         print(f"Image '{file_name}.{extension}' saved successfully to '{target_path}' directory.")
     except Exception as e:
         print(f"Error occurred while saving the image: {e}")
+
+#   Imported as is from Lab04/thresholding.py
+def crop(
+    image: np.ndarray, 
+    x_lower: int = None, 
+    x_upper: int = None, 
+    y_lower: int = None, 
+    y_upper: int = None
+) -> np.ndarray:
+    """
+    Crops an image along the x and y axis. The x and y values must
+    be within bounds of the image. No check is performed to see
+    if x_lower < x_upper or y_lower < y_upper.
+
+    Parameters:
+            image: the original image
+            x_lower: the lower bound of x (default: 0)
+            x_upper: the upper bound of x (default: image.width)
+            y_lower: the lower bound of y (default: 0)
+            y_upper: the upper bound of y (default: image.height)
+                
+    Returns:
+            cropped_image: the image cropped according to the window formed by x_lower, x_upper, y_lower, and y_upper
+    """
+    assert y_lower is None or y_lower >= 0 and y_upper is None or y_upper <= image.shape[0], "y out of bounds"
+    assert x_lower is None or x_lower >= 0 and x_upper is None or x_upper <= image.shape[1], "x out of bounds"
+    
+    # Crop the image according to the parameters
+    cropped_image = image[y_lower or 0 : y_upper or image.shape[0], x_lower or 0: x_upper or image.shape[1]]
+    
+    return cropped_image
     
 if __name__ == "__main__":
     main()

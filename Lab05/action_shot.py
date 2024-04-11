@@ -5,14 +5,15 @@ import numpy as np
 
 from stitching import *
 
-from lab05 import fetch_images, save_image, delete_images, show_image  ##  TODO: Remove these imports upon creation of final API
+from lab05 import fetch_images, save_image, delete_images, show_image, crop  ##  TODO: Remove these imports upon creation of final API
 
 def main():
-    delete_images('output', 'jpg')
+    #delete_images('output', 'jpg')
     #test_action_frames()    #   Passing
     #test_action_mask()      #   Passing
     #test_action_shot()     #    Failing
-    test_complete_action_shot()
+    #test_complete_action_shot()
+    show_image("Final Action Shot", crop(cv2.imread("output/action_4.jpg"), x_upper=1100))
     pass
 
 #   Generic cv2 function to extract frames from video
@@ -141,7 +142,6 @@ def test_complete_action_shot():
     fgbg = cv2.createBackgroundSubtractorMOG2()
     
     # Compute the median of all frames to estimate the background
-    
     background = np.median(frames, axis=0).astype(np.uint8)
 
     
@@ -153,18 +153,39 @@ def test_complete_action_shot():
     for frame in aligned_frames:
         fgmask = fgbg.apply(frame)
 
-        ##  TODO: This sort of works, but the overlayed images are transparent. Look into other methods of blending.
         #   Create a mask for the current action frame
         action_mask = np.zeros_like(background)
         action_mask[fgmask > 0] = 255
+        
+        #   Kernel for eroding and dilating        
+        kernelSmall = np.ones((3, 3), np.uint8)
+        #   Kernel for filling up holes
+        kernelLarge = np.ones((30, 30), np.uint8)
+        
+        #   Remove any thin lines (Not always guaranteed)
+        action_mask = cv2.erode(action_mask, kernelSmall, iterations=2)
+        action_mask = cv2.dilate(action_mask, kernelSmall, iterations=2)
+        
+        #   Fill up any space in between (Not always guaranteed to be correct with original)
+        action_mask = cv2.morphologyEx(action_mask, cv2.MORPH_CLOSE, kernelLarge)
+        
+        #   Normalize the images
+        action_mask = action_mask / 255.0
+        blended_result = blended_result / 255.0
+        frame = frame / 255.0
+        
+        #   Remove the part of image where mask is
+        for j in range(3):
+            blended_result[:,:,j] *= (1 - action_mask[:,:,j])
+            frame[:,:,j] *= (action_mask[:,:,j])
 
-        #   Perform alpha blending between the action frame and the background
-        alpha = 0.5  # TODO: Adjust the alpha value as needed
-        blended_result = cv2.addWeighted(blended_result, 1 - alpha, frame, alpha, 0)
+        #   Blend the result and the frame with denormalizing
+        blended_result = cv2.addWeighted(blended_result, 1, frame, 1, 0)
+        blended_result = (blended_result * 255).clip(0, 255).astype(np.uint8)
 
         show_image('Action Shot', blended_result)
         save_image(blended_result, f"action_{i}")
-        i+=1
+        i += 1
         
 
 if __name__ == '__main__':

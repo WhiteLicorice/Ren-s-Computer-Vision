@@ -218,7 +218,7 @@ def pad_image(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
                                        cv2.BORDER_CONSTANT, value=0)
     return padded_image
 
-def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, alpha: float = 0.9) -> None:
+def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 1000, alpha: float = 0.9) -> None:
     """
     Blends two images using keypoint matching and homography estimation.
 

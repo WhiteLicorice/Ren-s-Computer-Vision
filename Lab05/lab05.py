@@ -150,25 +150,34 @@ def test_image_stitching():
     # show_image("Image 8", img8)
     # show_image("Image 9", img9)
 
-    img1_2_3 = stitch_image(stitch_image(img1, img2), img3)
-    show_image("Image 1, 2, 3", img1_2_3)
-    save_image(img1_2_3, "img123")
+    img1_2_3 = cv2.imread("output/img123.jpg")
+    if img1_2_3 is None:
+        img1_2_3 = stitch_image(stitch_image(img2, img3, num_matches=1000), img1, num_matches=1000)
+        save_image(img1_2_3, "img123")
+    show_image("Image 1, 2, 3", img1_2_3) 
     
-    ##  TODO:::
-    ##  These two lines do not work for some reason
-    img4_5_6 = stitch_image(stitch_image(img4, img5), img6)
+    img4_5_6 = cv2.imread("output/img456.jpg")
+    if img4_5_6 is None:
+        img4_5_6 = stitch_image(stitch_image(img4, img5), img6)
+        save_image(img4_5_6, "img456")
     show_image("Image 4, 5, 6", img4_5_6)
-    save_image(img4_5_6, "img456")
     
-    img7_8_9 = stitch_image(stitch_image(img7, img8), img9)
+    img7_8_9 = cv2.imread("output/img789.jpg")
+    if img7_8_9 is None:
+        img7_8_9 = stitch_image(stitch_image(img7, img8), img9)
+        save_image(img7_8_9, "img789")
     show_image("Image 7, 8, 9", img7_8_9)
-    save_image(img7_8_9, "img789")
     
-    final_image = stitch_image(stitch_image(img1_2_3, img4_5_6), img7_8_9)
+    #   Band-aid solution to out of memory errors by Ren TM
+    img1_2_3 = resize_image(img1_2_3, 50)
+    img4_5_6 = resize_image(img4_5_6, 50)
+    img7_8_9 = resize_image(img7_8_9, 50)
+    
+    final_image = stitch_image(stitch_image(img1_2_3, img4_5_6, num_matches=5000), img7_8_9, num_matches=5000)
     show_image("Final Image", final_image)
     save_image(final_image, "stitched_image")
     
-    total_time = start_time - time.time()
+    total_time = time.time() - start_time
     
     print(f"Stitching Duration: {total_time}")
     
@@ -256,6 +265,11 @@ def save_image(image, file_name, target_path='output', extension='jpg'):
         print(f"Image '{file_name}.{extension}' saved successfully to '{target_path}' directory.")
     except Exception as e:
         print(f"Error occurred while saving the image: {e}")
-    
+
+def resize_image(image, scale_percent):
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+
 if __name__ == "__main__":
     main()

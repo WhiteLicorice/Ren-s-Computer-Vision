@@ -1,7 +1,5 @@
 import numpy as np
 import cv2
-from blending import test_blending
-from lab05 import show_image
 from skimage.morphology import binary_closing, binary_opening
 
 def cv2_stitch(img_list: list, method: str = 'perspective') -> np.ndarray:
@@ -51,7 +49,6 @@ def convert_to_gray(image: np.ndarray) -> tuple:
     
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return gray_image
-
 def extract_sift(image: np.ndarray) -> tuple:
     """
     Extracts keypoints and descriptors from the input image.
@@ -174,13 +171,13 @@ def blend_images(image1: np.ndarray, image2: np.ndarray, homography: np.ndarray,
 
 def bound_image(blended_image: np.ndarray) -> np.ndarray:
     """
-    Crops the blended image based on the white pixels in the mask.
+    Bounds the blended image based on the white pixels in the mask.
 
     Parameters:
-        blended_image (numpy.ndarray): The uncropped blended image.
+        blended_image (numpy.ndarray): The unbounded blended image.
 
     Returns:
-        numpy.ndarray: Cropped image.
+        numpy.ndarray: The bounded image.
     """
 
     #   Create mask for white pixel finding
@@ -196,9 +193,9 @@ def bound_image(blended_image: np.ndarray) -> np.ndarray:
     white = np.where(mask == 255)
     xmin, ymin, xmax, ymax = np.min(white[1]), np.min(white[0]), np.max(white[1]), np.max(white[0])
 
-    #   Crop image using the coordinates
-    cropped_image = blended_image[ymin:ymax, xmin:xmax]
-    return cropped_image
+    #   bound image using the coordinates
+    bound_image = blended_image[ymin:ymax, xmin:xmax]
+    return bound_image
 
 def pad_image(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     """
@@ -265,4 +262,174 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 50, 
     stitched_image = bound_image(blended_image)
 
     return stitched_image
+
+#   Imported as is from Lab04/thresholding.py
+def crop(image: np.ndarray, 
+         x_lower: int = None, 
+         x_upper: int = None, 
+         y_lower: int = None, 
+         y_upper: int = None) -> np.ndarray:
+    """
+    Crops an image along the x and y axis. The x and y values must
+    be within bounds of the image. No check is performed to see
+    if x_lower < x_upper or y_lower < y_upper.
+
+    Parameters:
+            image: the original image
+            x_lower: the lower bound of x (default: 0)
+            x_upper: the upper bound of x (default: image.width)
+            y_lower: the lower bound of y (default: 0)
+            y_upper: the upper bound of y (default: image.height)
+                
+    Returns:
+            cropped_image: the image cropped according to the window formed by x_lower, x_upper, y_lower, and y_upper
+    """
+    assert y_lower is None or y_lower >= 0 and y_upper is None or y_upper <= image.shape[0], "y out of bounds"
+    assert x_lower is None or x_lower >= 0 and x_upper is None or x_upper <= image.shape[1], "x out of bounds"
     
+    # Crop the image according to the parameters
+    cropped_image = image[y_lower or 0 : y_upper or image.shape[0], x_lower or 0: x_upper or image.shape[1]]
+    
+    return cropped_image
+
+#   Generic cv2 function to extract frames from video
+def extract_frames(video_path, frame_interval):
+    """
+    Extracts frames from a video at a specified interval.
+
+    Parameters:
+        video_path (str): Path to the input video file.
+        frame_interval (int): Interval at which frames are extracted.
+
+    Returns:
+        List[np.ndarray]: List of extracted frames as NumPy arrays.
+    """
+    
+    cap = cv2.VideoCapture(video_path)
+    frame_count = 0
+    frames = [ ]
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if frame_count % frame_interval == 0:
+            frames.append(frame)
+        
+        frame_count += 1
+
+    cap.release()
+    
+    return frames
+
+def generate_action_masks(frames: list, background_subtractor: str = 'mog') -> np.ndarray:
+    """
+    Generates action masks using background subtraction.
+
+    Parameters:
+        frames (List[np.ndarray]): List of input frames.
+        background_subtractor (str): Background subtractor algorithm ('knn' or 'mog').
+
+    Returns:
+        List[np.ndarray]: List of action masks.
+    """
+    
+    processed_frames = [ ]
+    bg_sub = None
+    match background_subtractor:
+        case 'knn': bg_sub = cv2.createBackgroundSubtractorKNN()
+        case 'mog': bg_sub = cv2.createBackgroundSubtractorMOG2()
+        case _: raise Exception ("Invalid background subtractor object. Valid arguments are 'knn' and 'mog'." )
+    
+    for frame in frames:
+        processed_frame = bg_sub.apply(frame)
+        processed_frames.append(processed_frame)
+        
+    return processed_frames
+
+def generate_action_shot(frames: list):
+    """
+    Generates an action shot by overlaying moving objects on the background.
+
+    Parameters:
+        frames (List[np.ndarray]): List of input frames.
+
+    Returns:
+        np.ndarray: Action shot with overlaid moving objects.
+    """
+    #   Read and process the reference frame, assuming that the reference frame is at index 0
+    reference_frame = frames[0]
+    keypoints_ref, descriptors_ref = extract_sift(reference_frame)
+
+    #   List to store aligned frames
+    aligned_frames = [ ]
+
+    #   Read and process subsequent frames
+    for frame in frames[1:]:
+        #   Detect keypoints and compute descriptors for the current frame
+        keypoints_curr, descriptors_curr = extract_sift(frame)
+
+        #   Match descriptors between reference frame and current frame
+        matches = match_descriptors(descriptors_ref, descriptors_curr)
+                
+        good_matches = select_top_matches(matches, 50)
+
+        #   Estimate homography using RANSAC
+        if len(good_matches) > 10:
+            homography = estimate_homography(keypoints_ref, keypoints_curr, good_matches)
+            #   Warp current frame to align with reference frame
+            aligned_frame = cv2.warpPerspective(frame, homography, (reference_frame.shape[1], reference_frame.shape[0]))
+            aligned_frames.append(aligned_frame)
+
+    ##  Implement modified version of generate_action_masks() here
+    
+    #   Initialize KNN background subtractor
+    fgbg = cv2.createBackgroundSubtractorMOG2()
+    
+    # Compute the median of all frames to estimate the background
+    background = np.median(frames, axis=0).astype(np.uint8)
+
+    #   Apply background subtraction and overlay the moving objects on the background using multi-layer blending
+    aligned_frames = [reference_frame] + aligned_frames  # Include reference frame
+    blended_result = background.copy()
+    #i = 0
+    
+    #   Apply background subtraction to aligned frames
+    for frame in aligned_frames:
+        fgmask = fgbg.apply(frame)
+
+        #   Create a mask for the current action frame
+        action_mask = np.zeros_like(background)
+        action_mask[fgmask > 0] = 255
+        
+        #   Kernel for eroding and dilating        
+        kernelSmall = np.ones((3, 3), np.uint8)
+        #   Kernel for filling up holes
+        kernelLarge = np.ones((30, 30), np.uint8)
+        
+        #   Remove any thin lines (Not always guaranteed)
+        action_mask = cv2.erode(action_mask, kernelSmall, iterations=2)
+        action_mask = cv2.dilate(action_mask, kernelSmall, iterations=2)
+        
+        #   Fill up any space in between (Not always guaranteed to be correct with original)
+        action_mask = cv2.morphologyEx(action_mask, cv2.MORPH_CLOSE, kernelLarge)
+        
+        #   Normalize the images
+        action_mask = action_mask / 255.0
+        blended_result = blended_result / 255.0
+        frame = frame / 255.0
+        
+        #   Remove the part of image where mask is
+        for j in range(3):
+            blended_result[:,:,j] *= (1 - action_mask[:,:,j])
+            frame[:,:,j] *= (action_mask[:,:,j])
+
+        #   Blend the result and the frame with denormalizing
+        blended_result = cv2.addWeighted(blended_result, 1, frame, 1, 0)
+        blended_result = (blended_result * 255).clip(0, 255).astype(np.uint8)
+
+        #show_image('Action Shot', blended_result)
+        #save_image(blended_result, f"action_{i}")
+        #i += 1
+        
+    return blended_result

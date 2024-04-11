@@ -14,7 +14,7 @@
     (doing the cartwheel, running forehand in tennis, grand jeté in ballet, somersault in acrobatics or diving, forward flip in skateboarding)
     SAFETY FIRST. Be sure you know what you are doing should you embark in this adventure.
     
-    The testing suite can be accessed in lab05.py and the stitching functions should be accessed via stitching.py.
+    The testing suite can be accessed in lab05.py and the relevant functions should be accessed via stitching.py.
 """
 
 import cv2
@@ -25,14 +25,20 @@ import os
 
 from stitching import *
 
-
 def main():
+    """IMAGE STITCHING"""
     #test_cv2_stitcher()        #   Passing
     #test_pad_image()           #   Passing
     #test_extract_features()    #   Passing
     #test_find_matches()        #   Passing
     #test_find_best_matches()   #   Passing
-    test_image_stitching()     #   Passing
+    test_image_stitching()    #   Passing
+    
+    """ACTION SHOT"""
+    #test_extract_frames()      #   Passing
+    #test_action_mask()         #   Passing
+    #test_action_shot()         #   Passing
+
     pass
 
 """TESTING SUITE"""
@@ -75,8 +81,9 @@ def test_find_best_matches():
     matched_image = cv2.drawMatches(image1, keypoints1, image2, keypoints2, top_matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
     plot_image("Matches", matched_image)
-    
-def test_image_stitching():
+
+@DeprecationWarning
+def bulk_image_stitching():
     img_ratio = 1
     start = time.time()
     
@@ -117,6 +124,41 @@ def test_image_stitching():
 
     show_image("Stitched Image", stitched_image)
     save_image(stitched_image, "image_test")
+
+def test_image_stitching():
+    start_time = time.time()
+    
+    img1 = cv2.imread("data/IMG1.jpg")
+    img2 = cv2.imread("data/IMG2.jpg")
+    img3 = cv2.imread("data/IMG3.jpg")
+    
+    img4 = cv2.imread("data/IMG4.jpg")
+    img5 = cv2.imread("data/IMG5.jpg")
+    img6 = cv2.imread("data/IMG6.jpg")
+    
+    img7 = cv2.imread("data/IMG7.jpg")
+    img8 = cv2.imread("data/IMG8.jpg")
+    img9 = cv2.imread("data/IMG9.jpg")
+    
+    img1_2_3 = stitch_image(stitch_image(img1, img2), img3)
+    show_image("Image 1, 2, 3", img1_2_3)
+    save_image(img1_2_3, "img123")
+    
+    img4_5_6 = stitch_image(stitch_image(img4, img5), img6)
+    show_image("Image 4, 5, 6", img4_5_6)
+    save_image(img4_5_6, "img456")
+    
+    img7_8_9 = stitch_image(stitch_image(img7, img8), img9)
+    show_image("Image 7, 8, 9", img7_8_9)
+    save_image(img7_8_9, "img789")
+    
+    final_image = stitch_image(stitch_image(img1_2_3, img4_5_6), img7_8_9)
+    show_image("Final Image", final_image)
+    save_image(final_image, "stitched_image")
+    
+    total_time = start_time - time.time()
+    
+    print(f"Stitching Duration: {total_time}")
     
 def test_pad_image():
     image1 = cv2.imread("IMG1.jpg")
@@ -137,6 +179,28 @@ def test_extract_features():
 
     plot_image("Image Features", image_with_keypoints)
 
+def test_extract_frames():
+    video = "data/spike.mp4"
+    interval = 15
+    frames = extract_frames(video, interval)
+    i = 0
+    for frame in frames:
+        show_image(f'action_{i}', frame)
+        i += interval
+
+def test_action_mask():
+    mask_frames = generate_action_masks(extract_frames("data/spike.mp4", 15), 'mog')
+    for frame in mask_frames:
+        show_image('Mask Frame', frame)
+
+def test_action_shot():
+    frames = extract_frames("data/spike.mp4", 15)
+    action_shot = generate_action_shot(extract_frames("data/spike.mp4", 15))
+    final_shot = crop(action_shot, x_upper=1100)
+    
+    save_image(final_shot, 'action_shot')
+    show_image("Action Shot", final_shot)
+    
 """UTILITIES"""
 def show_image(image_label, image):
     #   Show image in a normal window
@@ -168,7 +232,7 @@ def delete_images(directory, file_type):
     for f in files:
         os.remove(f)
 
-def save_image(image, file_name, target_path="output", extension='jpg'):
+def save_image(image, file_name, target_path='output', extension='jpg'):
     # Ensure target directory exists
     if not os.path.exists(target_path):
         os.makedirs(target_path)
@@ -180,37 +244,6 @@ def save_image(image, file_name, target_path="output", extension='jpg'):
         print(f"Image '{file_name}.{extension}' saved successfully to '{target_path}' directory.")
     except Exception as e:
         print(f"Error occurred while saving the image: {e}")
-
-#   Imported as is from Lab04/thresholding.py
-def crop(
-    image: np.ndarray, 
-    x_lower: int = None, 
-    x_upper: int = None, 
-    y_lower: int = None, 
-    y_upper: int = None
-) -> np.ndarray:
-    """
-    Crops an image along the x and y axis. The x and y values must
-    be within bounds of the image. No check is performed to see
-    if x_lower < x_upper or y_lower < y_upper.
-
-    Parameters:
-            image: the original image
-            x_lower: the lower bound of x (default: 0)
-            x_upper: the upper bound of x (default: image.width)
-            y_lower: the lower bound of y (default: 0)
-            y_upper: the upper bound of y (default: image.height)
-                
-    Returns:
-            cropped_image: the image cropped according to the window formed by x_lower, x_upper, y_lower, and y_upper
-    """
-    assert y_lower is None or y_lower >= 0 and y_upper is None or y_upper <= image.shape[0], "y out of bounds"
-    assert x_lower is None or x_lower >= 0 and x_upper is None or x_upper <= image.shape[1], "x out of bounds"
-    
-    # Crop the image according to the parameters
-    cropped_image = image[y_lower or 0 : y_upper or image.shape[0], x_lower or 0: x_upper or image.shape[1]]
-    
-    return cropped_image
     
 if __name__ == "__main__":
     main()

@@ -61,7 +61,6 @@ def main():
     model = LinearRegression()
     model.fit(data)
     slope, intercept = model.get_parameters()
-    model.show_graph()
     print(f"{Color.YELLOW}{model}{Color.END}")
     print(f"{Color.YELLOW}Slope: {slope}\nIntercept: {intercept}{Color.YELLOW}")
     

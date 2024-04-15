@@ -149,24 +149,25 @@ def test_image_stitching():
     # show_image("Image 7", img7)
     # show_image("Image 8", img8)
     # show_image("Image 9", img9)
+    
 
     img1_2_3 = cv2.imread("output/img123.jpg")
     if img1_2_3 is None:
-        img1_2_3 = stitch_image(stitch_image(img2, img3, num_matches=1000), img1, num_matches=1000)
+        img1_2_3 = stitch_image(img1, stitch_image(img2, img3, num_matches=1000), num_matches=1000)
         save_image(img1_2_3, "img123")
-    show_image("Image 1, 2, 3", img1_2_3) 
+    #show_image("Image 1, 2, 3", img1_2_3) 
     
     img4_5_6 = cv2.imread("output/img456.jpg")
     if img4_5_6 is None:
-        img4_5_6 = stitch_image(stitch_image(img4, img5), img6)
+        img4_5_6 = stitch_image(img4, stitch_image(img5, img6, num_matches=1000), num_matches=1000)
         save_image(img4_5_6, "img456")
-    show_image("Image 4, 5, 6", img4_5_6)
+    #show_image("Image 4, 5, 6", img4_5_6)
     
     img7_8_9 = cv2.imread("output/img789.jpg")
     if img7_8_9 is None:
-        img7_8_9 = stitch_image(stitch_image(img7, img8), img9)
+        img7_8_9 = stitch_image(img7, stitch_image(img8, img9, num_matches=1000), num_matches=1000)
         save_image(img7_8_9, "img789")
-    show_image("Image 7, 8, 9", img7_8_9)
+    #show_image("Image 7, 8, 9", img7_8_9)
     
     #   Band-aid solution to out of memory errors by Ren TM
     img1_2_3 = resize_image(img1_2_3, 50)

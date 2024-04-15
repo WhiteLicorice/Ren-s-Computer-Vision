@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from skimage.morphology import binary_closing, binary_opening
+from lab05 import show_image
 
 def cv2_stitch(img_list: list, method: str = 'perspective') -> np.ndarray:
     """
@@ -149,9 +149,7 @@ def blend_images(image1: np.ndarray, image2: np.ndarray, homography: np.ndarray,
     #   Get the intersection
     mask = (result != 0) & (image2 != 0)
     #   Refine the mask and remove any discrepancies
-    mask = binary_closing(mask)
-    mask = binary_opening(mask)
-    
+    mask[mask > 0] = 255
     #   Make a grey mask
     mask = mask.astype(np.uint8) * 255
     
@@ -186,7 +184,7 @@ def bound_image(blended_image: np.ndarray) -> np.ndarray:
     upper = (255, 255, 255)
     
     #   Create the mask for white pixel finding
-    #   Retrieve the pixels within the bounds as boolean, then .astype(np.uint8) * 255 makes it white for mask
+    #   Makes a binary mask, where using inRange using lower and upper makes the between white
     mask = cv2.inRange(blended_image, lower, upper)
 
     #   Get white pixel bounds via the coordinates
@@ -250,11 +248,6 @@ def stitch_image(image1: np.ndarray, image2: np.ndarray, num_matches: int = 1000
 
     #   Estimate homography
     homography = estimate_homography(keypoints1, keypoints2, selected_matches)
-    
-    ##  TODO: Diagnose this line
-    # #   Skip space themed warp
-    # if homography[1][1] < 0 or homography[1][1] > 2:
-    #     return None
 
     #   Blend images
     blended_image = blend_images(image1, image2, homography, alpha)

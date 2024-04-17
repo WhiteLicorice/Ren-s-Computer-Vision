@@ -44,5 +44,64 @@ The results are as follows.
   <caption>Figure 3.2: Blending Two Chessboards with an Irregular Mask (Not Your Typical Endgame)</caption>
 </table>
 
+##  Lab 04
+
+The goal of this laboratory exercise is to estimate the amount of liquid contained in a bottle. You are provided images of the bottle with unknown amounts of liquid. You are to create a method for guessing these amounts. OpenCV image filtering, thresholding, or morphology operations are allowed.
+
+<table border="1">
+  <tr>
+    <th>Known Amounts</th>
+    <th>Volume (ml)</th>
+  </tr>
+  <tr>
+    <td>350ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/40dedec7-e7ea-4a68-9874-73c4c5f55971" alt="350ml"></td>
+  </tr>
+  <tr>
+    <td>300ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/748efc69-6b4d-4bd0-b789-abd15cc3bc4c" alt="300ml"></td>
+  </tr>
+  <tr>
+    <td>250ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/838fed9b-27af-4345-b8ce-3535036089df" alt="250ml"></td>
+  </tr>
+  <tr>
+    <td>200ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/f0a9e8e5-78b0-49a0-ac5b-9cf2a027dbb5" alt="200ml"></td>
+  </tr>
+  <tr>
+    <td>150ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/eb66141e-0ba7-42f3-be7b-7319c2ce81c3" alt="150ml"></td>
+  </tr>
+  <tr>
+    <td>100ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/8d794511-caa8-4a85-88de-75bfb33ed546" alt="100ml"></td>
+  </tr>
+  <tr>
+    <td>50ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/b110fd6d-0dd6-45c2-b971-5cec287a31a5" alt="50ml"></td>
+  </tr>
+  <tr>
+    <th>Unknown Amounts</th>
+    <th>Mean Volume Prediction (ml)</th>
+    <th>Images</th>
+  </tr>
+  <tr>
+    <td>A</td>
+    <td>121.88246052809572</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/5324e65a-a370-4998-80e4-bbfd7e5b98e1" alt="pawn"></td>
+  </tr>
+  <tr>
+    <td>B</td>
+    <td>207.24439346171175</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/3b7405b6-b492-46ad-b0c4-875adcec6ed2" alt="bishop"></td>
+  </tr>
+  <tr>
+    <td>C</td>
+    <td>344.54605205729194</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/65d15a2d-04a7-4442-9c2e-ec53e5c2b8ef" alt="rook"></td>
+  </tr>
+</table>
+
 
 

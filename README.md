@@ -51,7 +51,7 @@ The goal of this laboratory exercise is to estimate the amount of liquid contain
 <table border="1">
   <tr>
     <th>Known Amounts</th>
-    <th>Volume (ml)</th>
+    <th>Bottle</th>
   </tr>
   <tr>
     <td>350ml</td>
@@ -82,24 +82,20 @@ The goal of this laboratory exercise is to estimate the amount of liquid contain
     <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/b110fd6d-0dd6-45c2-b971-5cec287a31a5" alt="50ml"></td>
   </tr>
   <tr>
-    <th>Unknown Amounts</th>
-    <th>Mean Volume Prediction (ml)</th>
-    <th>Images</th>
+    <th>Predicted Amount</th>
+    <th>Bottle</th>
   </tr>
   <tr>
-    <td>A</td>
-    <td>121.88246052809572</td>
-    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/5324e65a-a370-4998-80e4-bbfd7e5b98e1" alt="pawn"></td>
+    <td>122ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/ec4313fb-e587-4afc-9850-63cd601fe019" alt="122ml"></td>
   </tr>
   <tr>
-    <td>B</td>
-    <td>207.24439346171175</td>
-    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/3b7405b6-b492-46ad-b0c4-875adcec6ed2" alt="bishop"></td>
+    <td>207ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/89b96486-30ec-42fa-8b9b-2e5a1ed270a2" alt="207ml"></td>
   </tr>
   <tr>
-    <td>C</td>
-    <td>344.54605205729194</td>
-    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/65d15a2d-04a7-4442-9c2e-ec53e5c2b8ef" alt="rook"></td>
+    <td>345ml</td>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/65d15a2d-04a7-4442-9c2e-ec53e5c2b8ef" alt="345ml"></td>
   </tr>
 </table>
 

@@ -128,14 +128,14 @@ The goal of this laboratory exercise is to estimate the amount of liquid contain
 With this [article](https://medium.com/@paulsonpremsingh7/image-stitching-using-opencv-a-step-by-step-tutorial-9214aa4255ec) as basis, stitch the provided images of a spread from a book. Once you have devised a method for stitching images, acquire a video and generate an actionshot image.  [Actionshot](https://en.wikipedia.org/wiki/ActionShot) is a method of capturing an object in action and displaying it in a single image with multiple sequential appearances of the object. SAFETY FIRST. Be sure you know what you are doing should you choose to record your own video.
 
 <table>
-  <caption><i>An Odd Book Spread</i></caption>
+  <caption><i>Figure 5.1: An Odd Book Spread</i></caption>
   <tr>
     <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/b08f712b-06b0-4722-b97a-324a612ba1fd" alt="stitched_image"></td>
   </tr>
 </table>
 
 <table>
-  <caption><i>Spike Action Shot</i></caption>
+  <caption><i>Figure 5.2: Spike Action Shot</i></caption>
   <tr>
     <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/1d51b89f-678d-42fa-9bff-26ca7e420299" alt="action_shot"></td>
   </tr>

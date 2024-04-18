@@ -6,8 +6,13 @@ This is a repository for lab work in CMSC 174 (Computer Vision) with OpenCV-Pyth
 
 Create a Python script that replicates the process in this [video](https://fb.watch/pWLNqOIQPE/) using OpenCV-Python.
 
-![Output](https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/db6927d7-e9fc-4f41-a06b-6e1b8164de51)
-<caption><i>Figure 1.1: Playing Around With Perspective</i></caption>
+<table>
+  <caption><i>Figure 1.1: Playing Around With Perspective</i></caption>
+  <tr>
+    <td align="center"><img src="https://github.com/WhiteLicorice/Ren-s-Computer-Vision/assets/96515086/db6927d7-e9fc-4f41-a06b-6e1b8164de51" alt="Output"></td
+  </tr>
+</table>
+
 
 ##  Lab 02
 

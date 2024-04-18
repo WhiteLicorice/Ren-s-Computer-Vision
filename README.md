@@ -46,7 +46,7 @@ The results are as follows.
 
 ##  Lab 04
 
-The goal of this laboratory exercise is to estimate the amount of liquid contained in a bottle. You are provided images of the bottle with unknown amounts of liquid. You are to create a method for guessing these amounts. OpenCV image filtering, thresholding, or morphology operations are allowed.
+The goal of this laboratory exercise is to estimate the amount of liquid contained in a bottle. Given images of a bottle with unknown amounts of liquid, you are to devise a method for guessing these amounts. OpenCV image filtering, thresholding, or morphology operations are allowed.
 
 <table border="1">
   <tr>
